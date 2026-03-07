@@ -32,11 +32,11 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative bg-white z-[80] border-t-[3px] border-black">
-      <div className="w-full px-6 lg:px-12 py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-8">
+    <footer className="relative w-full max-w-full bg-white z-[80] border-t-[3px] border-black overflow-x-clip">
+      <div className="w-full px-4 sm:px-6 lg:px-12 py-12 lg:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-2">
             <a href="/" className="flex items-center gap-2 group mb-4">
               <div className="w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sticker">
                 <img
@@ -128,7 +128,7 @@ export default function Footer() {
           transition={{ duration: 0.6 }}
           className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          <p className="text-gray text-sm">
+          <p className="text-gray text-sm text-center sm:text-left">
             (c) 2026 EditFile. All rights reserved.
           </p>
           <div className="flex items-center gap-4">

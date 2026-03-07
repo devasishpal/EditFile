@@ -44,19 +44,31 @@ export default function Navigation() {
   return (
     <>
       <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+        }}
+        className={`fixed top-0 inset-x-0 z-[1000] transition-all duration-300 ${
           isScrolled
-            ? 'bg-violet/90 backdrop-blur-md border-b border-white/10'
-            : 'bg-transparent'
+            ? 'bg-violet/95 backdrop-blur-md border-b border-white/10'
+            : 'bg-violet/80 backdrop-blur-sm border-b border-white/10'
         }`}
       >
-        <div className="w-full px-6 lg:px-12">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+        <div
+          className="w-full max-w-full box-border overflow-x-clip"
+          style={{
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)',
+          }}
+        >
+          <div className="flex w-full max-w-full items-center justify-between gap-3 h-16 lg:h-20 px-2.5 sm:px-6 lg:px-12 box-border min-w-0 overflow-x-clip">
             {/* Logo */}
-            <a href="/" className="flex items-center gap-2 group">
+            <a href="/" className="flex min-w-0 items-center gap-2 group">
               <div className="w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sticker">
                 <img
                   src="/favicon/favicon-32x32.png?v=20260305"
@@ -64,13 +76,13 @@ export default function Navigation() {
                   className="w-6 h-6 object-contain"
                 />
               </div>
-              <span className="font-display font-bold text-xl text-white tracking-tight">
+              <span className="hidden sm:block font-display font-bold text-lg xl:text-xl text-white tracking-tight truncate">
                 EditFile
               </span>
             </a>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-8">
+            <div className="hidden xl:flex items-center gap-6 2xl:gap-8">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
@@ -83,7 +95,7 @@ export default function Navigation() {
             </div>
 
             {/* CTA Button */}
-            <div className="hidden lg:block">
+            <div className="hidden xl:block">
               <a
                 href="#tools"
                 className="sticker-button text-sm"
@@ -95,7 +107,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center shadow-sticker"
+              className="xl:hidden ml-auto w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center shadow-sticker shrink-0 box-border"
             >
               {isMobileMenuOpen ? (
                 <X className="w-5 h-5 text-dark" />
@@ -115,7 +127,7 @@ export default function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 lg:hidden"
+            className="fixed inset-0 z-[1100] xl:hidden overflow-x-hidden"
           >
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -125,10 +137,11 @@ export default function Navigation() {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 h-full w-72 bg-white border-l-[3px] border-black shadow-sticker-lg pt-20"
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              style={{ right: 'env(safe-area-inset-right)' }}
+              className="absolute inset-y-0 right-0 box-border w-full max-w-[20rem] bg-white border-l-[3px] border-black shadow-sticker-lg pt-20 overflow-x-hidden"
             >
-              <div className="flex flex-col gap-2 p-6">
+              <div className="flex flex-col gap-2 p-4 sm:p-6">
                 {navLinks.map((link) => (
                   <a
                     key={link.name}

@@ -214,29 +214,29 @@ export default function ToolTemplate({
       : convertButtonLabel;
 
   return (
-    <div className="w-full px-4 lg:px-6 py-8">
+    <div className="w-full px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
       <div className="max-w-4xl mx-auto">
         {/* Upload Area */}
         {files.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="sticker-card p-8 lg:p-12"
+            className="sticker-card p-5 sm:p-8 lg:p-12"
           >
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-3 border-dashed rounded-2xl p-12 lg:p-16 flex flex-col items-center justify-center transition-all cursor-pointer ${
+              className={`border-3 border-dashed rounded-2xl p-6 sm:p-10 lg:p-16 flex flex-col items-center justify-center transition-all cursor-pointer ${
                 isDragging
                   ? 'border-pink bg-pink/5'
                   : 'border-gray-300 hover:border-violet hover:bg-violet/5'
               }`}
             >
-              <div className="w-20 h-20 bg-violet/10 rounded-2xl flex items-center justify-center mb-6">
-                <Upload className="w-10 h-10 text-violet" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-violet/10 rounded-2xl flex items-center justify-center mb-6">
+                <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-violet" />
               </div>
-              <h3 className="font-display font-bold text-2xl text-dark text-center mb-2">
+              <h3 className="font-display font-bold text-xl sm:text-2xl text-dark text-center mb-2">
                 Drop {fileTypeLabel} files here
               </h3>
               <p className="text-gray text-center mb-6">
@@ -267,7 +267,7 @@ export default function ToolTemplate({
             >
               {/* Settings Toggle */}
               {showSettings && showSettingsToggle && (
-                <div className="flex justify-end">
+                <div className="flex justify-start sm:justify-end">
                   <button
                     onClick={() => setShowSettingsPanel(!showSettingsPanel)}
                     className="sticker-button-secondary py-2 px-4"
@@ -285,7 +285,7 @@ export default function ToolTemplate({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="sticker-card p-6"
+                    className="sticker-card p-4 sm:p-6"
                   >
                     {settingsComponent}
                   </motion.div>
@@ -300,9 +300,9 @@ export default function ToolTemplate({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="sticker-card p-5"
+                  className="sticker-card p-4 sm:p-5"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="w-12 h-12 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0">
                       <FileText className="w-6 h-6 text-violet" />
                     </div>
@@ -314,9 +314,9 @@ export default function ToolTemplate({
                         {formatSize(file.size)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end gap-2">
                       {file.status === 'completed' && !manualProcessing ? (
-                        <button className="sticker-button py-2 px-4">
+                        <button className="sticker-button py-2 px-4 text-sm">
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </button>
@@ -348,8 +348,8 @@ export default function ToolTemplate({
               ))}
 
               {/* Actions */}
-              <div className="flex items-center justify-between">
-                <label className="sticker-button-secondary cursor-pointer">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <label className="sticker-button-secondary cursor-pointer w-full sm:w-auto justify-center sm:justify-start">
                   <Upload className="w-4 h-4 mr-2" />
                   <span>Add More Files</span>
                   <input
@@ -365,13 +365,13 @@ export default function ToolTemplate({
                   <button
                     onClick={() => void handleManualPrimaryAction()}
                     disabled={isConverting || files.length === 0 || (isConverted && !onManualDownload)}
-                    className="sticker-button disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="sticker-button disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     {primaryActionLabel}
                   </button>
                 ) : files.some((f) => f.status === 'completed') ? (
-                  <button className="sticker-button">
+                  <button className="sticker-button w-full sm:w-auto justify-center">
                     <Download className="w-4 h-4 mr-2" />
                     Download All
                   </button>

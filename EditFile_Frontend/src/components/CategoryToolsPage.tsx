@@ -118,19 +118,26 @@ export default function CategoryToolsPage({
   activeCategory,
 }: CategoryToolsPageProps) {
   return (
-    <div className="min-h-screen bg-violet relative">
+    <div className="min-h-screen w-full max-w-full bg-violet relative overflow-x-clip">
       <div className="grain-overlay" />
 
-      <header className="sticky top-0 z-40 bg-violet/95 backdrop-blur-md border-b border-white/10">
-        <div className="w-full px-6 lg:px-12 py-4 flex items-center justify-between gap-4">
-          <Link to="/" className="sticker-button-secondary !px-4 !py-2">
+      <header
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+        }}
+        className="sticky top-0 z-40 bg-violet/95 backdrop-blur-md border-b border-white/10"
+      >
+        <div className="w-full px-4 sm:px-6 lg:px-12 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+          <Link to="/" className="sticker-button-secondary !px-3 sm:!px-4 !py-2 text-xs sm:text-sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Home
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="w-full sm:w-auto grid grid-cols-2 sm:flex items-center gap-2">
             <Link
               to="/pdf-tools"
-              className={`px-4 py-2 rounded-xl border-[2px] font-semibold text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm transition-colors text-center ${
                 activeCategory === 'pdf'
                   ? 'bg-pink text-white border-black'
                   : 'bg-white text-dark border-black hover:bg-pink/10'
@@ -140,7 +147,7 @@ export default function CategoryToolsPage({
             </Link>
             <Link
               to="/image-tools"
-              className={`px-4 py-2 rounded-xl border-[2px] font-semibold text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm transition-colors text-center ${
                 activeCategory === 'image'
                   ? 'bg-pink text-white border-black'
                   : 'bg-white text-dark border-black hover:bg-pink/10'
@@ -152,7 +159,7 @@ export default function CategoryToolsPage({
         </div>
       </header>
 
-      <main className="relative z-10 px-6 lg:px-12 py-10 lg:py-14">
+      <main className="relative z-10 w-full max-w-full px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-14">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -160,13 +167,13 @@ export default function CategoryToolsPage({
             transition={{ duration: 0.45 }}
             className="mb-10"
           >
-            <h1 className="font-display font-bold text-4xl lg:text-5xl text-white uppercase tracking-tight">
+            <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
               {title}
             </h1>
-            <p className="text-white/70 text-lg mt-4 max-w-3xl">{description}</p>
+            <p className="text-white/70 text-base sm:text-lg mt-4 max-w-3xl">{description}</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="tool-cards-grid">
             {tools.map((tool, index) => (
               <ToolCard key={tool.id} tool={tool} index={index} />
             ))}

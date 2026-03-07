@@ -19,13 +19,15 @@ function App() {
   const snapTriggerRef = useRef<ScrollTrigger | null>(null);
 
   useEffect(() => {
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+
     gsap.config({
       force3D: true,
       nullTargetWarn: false,
     });
 
     ScrollTrigger.config({
-      ignoreMobileResize: true,
+      ignoreMobileResize: isDesktop,
       autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load',
     });
 
@@ -35,6 +37,9 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (!isDesktop) return;
+
     // Wait for all sections to mount and create their ScrollTriggers
     const timer = setTimeout(() => {
       const pinned = ScrollTrigger.getAll()
@@ -106,7 +111,7 @@ function App() {
       <Navigation />
 
       {/* Main Content */}
-      <main ref={mainRef} className="relative">
+      <main ref={mainRef} className="relative w-full max-w-full overflow-x-clip">
         {/* Pinned Sections with z-index stacking */}
         <HeroSection />
         <ToolsSection />

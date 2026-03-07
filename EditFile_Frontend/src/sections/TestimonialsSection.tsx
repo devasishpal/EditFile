@@ -7,14 +7,14 @@ export default function TestimonialsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="relative bg-violet py-20 lg:py-32 z-50 overflow-hidden">
-      <div className="w-full px-6 lg:px-12">
+    <section className="relative bg-violet py-16 sm:py-20 lg:py-32 z-50 overflow-hidden">
+      <div className="w-full px-4 sm:px-6 lg:px-12">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
-          <h2 className="font-display font-bold text-4xl lg:text-5xl text-white uppercase tracking-tight">
+          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
             Loved by <span className="text-pink">Thousands</span>
           </h2>
-          <p className="text-white/70 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-white/70 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
             See what our users say about EditFile.
           </p>
         </div>

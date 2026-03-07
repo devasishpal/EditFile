@@ -88,16 +88,16 @@ function CategoryBlock({ to, title, description, count, icon: Icon, index }: Cat
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className="sticker-card p-6 md:p-8 flex items-start justify-between gap-4 group"
+      className="sticker-card p-5 sm:p-6 md:p-8 flex flex-col sm:flex-row items-start justify-between gap-4 group"
     >
       <div>
         <span className="sticker-label bg-pink text-white border-pink text-[10px]">
           {count} TOOLS
         </span>
-        <h3 className="font-display font-bold text-dark text-2xl mt-4">{title}</h3>
-        <p className="text-gray mt-2 max-w-xs">{description}</p>
+        <h3 className="font-display font-bold text-dark text-xl sm:text-2xl mt-4">{title}</h3>
+        <p className="text-gray mt-2 max-w-xs text-sm sm:text-base">{description}</p>
       </div>
-      <div className="flex flex-col items-end gap-4">
+      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-4">
         <div className="w-14 h-14 bg-violet rounded-2xl border-[3px] border-black flex items-center justify-center shadow-sticker">
           <Icon className="w-6 h-6 text-white" />
         </div>
@@ -147,15 +147,15 @@ export default function ToolsSection() {
     <section
       ref={sectionRef}
       id="tools"
-      className="relative bg-violet py-20 lg:py-32 z-20"
+      className="relative bg-violet py-16 sm:py-20 lg:py-32 z-20"
     >
-      <div className="w-full px-6 lg:px-12">
+      <div className="w-full px-4 sm:px-6 lg:px-12">
         {/* Header */}
         <div ref={headerRef} className="text-center mb-12 lg:mb-16">
-          <h2 className="font-display font-bold text-4xl lg:text-5xl text-white uppercase tracking-tight">
+          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
             Start With <span className="text-pink">Common Tools</span>
           </h2>
-          <p className="text-white/70 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-white/70 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
             Quick access to the most used editing tools. Open full tool lists for PDF and image files from the blocks below.
           </p>
         </div>
@@ -182,14 +182,14 @@ export default function ToolsSection() {
 
         {/* Common Tools */}
         <div>
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-pink rounded-xl border-[3px] border-black flex items-center justify-center shadow-accent">
               <Star className="w-5 h-5 text-white" />
             </div>
-            <h3 className="font-display font-bold text-2xl text-white">Common Tools</h3>
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-white">Common Tools</h3>
             <span className="text-white/50 text-sm">({commonTools.length} tools)</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="tool-cards-grid">
             {commonTools.map((tool, index) => (
               <ToolCard key={tool.id} tool={tool} index={index} />
             ))}

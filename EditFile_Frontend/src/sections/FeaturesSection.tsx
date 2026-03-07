@@ -54,15 +54,15 @@ export default function FeaturesSection() {
     <section
       ref={sectionRef}
       id="features"
-      className="relative bg-violet py-20 lg:py-32 z-30"
+      className="relative bg-violet py-16 sm:py-20 lg:py-32 z-30"
     >
-      <div className="w-full px-6 lg:px-12">
+      <div className="w-full px-4 sm:px-6 lg:px-12">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
-          <h2 className="font-display font-bold text-4xl lg:text-5xl text-white uppercase tracking-tight">
+          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
             Why Choose <span className="text-pink">Us</span>
           </h2>
-          <p className="text-white/70 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-white/70 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
             The fastest, most secure way to edit your files. No signup required.
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function FeaturesSection() {
         </div>
 
         {/* Stats Row */}
-        <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { value: '10M+', label: 'Files Processed' },
             { value: '25+', label: 'Powerful Tools' },

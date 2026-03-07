@@ -67,6 +67,11 @@ export default function HeroSection() {
         '-=0.6'
       );
 
+      const shouldPin = window.matchMedia('(min-width: 1024px)').matches;
+      if (!shouldPin) {
+        return;
+      }
+
       // Scroll-driven exit animation
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -121,29 +126,29 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="section-pinned bg-violet z-10 flex items-center"
+      className="section-pinned bg-violet z-10 flex items-start lg:items-center"
     >
-      <div className="w-full px-6 lg:px-12 pt-20">
-        <div className="relative flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-0">
+      <div className="w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 lg:pt-20 pb-8 sm:pb-12 lg:pb-0">
+        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 lg:gap-0">
           {/* Left: Headline */}
           <div ref={headlineRef} className="w-full lg:w-[44vw] lg:pl-[7vw]">
             <h1 className="font-display font-bold uppercase tracking-tight">
-              <span className="headline-line block text-pink text-[clamp(48px,8vw,96px)] leading-[0.92]">
+              <span className="headline-line block text-pink text-[clamp(34px,11vw,96px)] leading-[0.92]">
                 Upload
               </span>
-              <span className="headline-line block text-white text-[clamp(48px,8vw,96px)] leading-[0.92]">
+              <span className="headline-line block text-white text-[clamp(34px,11vw,96px)] leading-[0.92]">
                 Edit
               </span>
-              <span className="headline-line block text-white text-[clamp(48px,8vw,96px)] leading-[0.92]">
+              <span className="headline-line block text-white text-[clamp(34px,11vw,96px)] leading-[0.92]">
                 Done
               </span>
             </h1>
 
-            <p className="subheadline mt-6 lg:mt-8 text-white/80 text-lg lg:text-xl max-w-md leading-relaxed">
-              PDFs and images, converted, compressed, organized—right in your browser.
+            <p className="subheadline mt-5 sm:mt-6 lg:mt-8 text-white/80 text-base sm:text-lg lg:text-xl max-w-md leading-relaxed">
+              PDFs and images, converted, compressed, organized right in your browser.
             </p>
 
-            <div className="cta-row mt-8 flex flex-wrap items-center gap-4">
+            <div className="cta-row mt-7 sm:mt-8 flex flex-wrap items-start sm:items-center gap-3 sm:gap-4">
               <a href="#tools" className="sticker-button group">
                 <span>Start Editing</span>
                 <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -162,9 +167,9 @@ export default function HeroSection() {
             ref={cardRef}
             className="w-full lg:w-[40vw] lg:h-[56vh] lg:absolute lg:right-[6vw] lg:top-1/2 lg:-translate-y-1/2"
           >
-            <div className="sticker-card h-full p-6 lg:p-8 flex flex-col -rotate-2">
+            <div className="sticker-card h-full p-4 sm:p-6 lg:p-8 flex flex-col -rotate-2">
               {/* Upload Zone */}
-              <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-8 hover:border-pink hover:bg-pink/5 transition-colors cursor-pointer group">
+              <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-5 sm:p-8 hover:border-pink hover:bg-pink/5 transition-colors cursor-pointer group">
                 <div className="w-16 h-16 bg-violet/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-violet/20 transition-colors">
                   <Upload className="w-8 h-8 text-violet" />
                 </div>
@@ -174,7 +179,7 @@ export default function HeroSection() {
                 <p className="text-gray text-sm text-center mt-1">
                   or click to browse
                 </p>
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                   <span className="sticker-label text-[10px]">
                     <FileText className="w-3 h-3 mr-1" />
                     PDF
@@ -191,7 +196,7 @@ export default function HeroSection() {
               </div>
 
               {/* File Row */}
-              <div className="mt-4 p-4 bg-gray-100 rounded-xl border-[2px] border-black flex items-center gap-3">
+              <div className="mt-4 p-4 bg-gray-100 rounded-xl border-[2px] border-black flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 bg-pink rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
@@ -232,3 +237,4 @@ export default function HeroSection() {
     </section>
   );
 }
+

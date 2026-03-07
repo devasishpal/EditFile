@@ -41,22 +41,33 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
   // const allTools = [...availablePdfTools, ...availableImageTools];
 
   return (
-    <div className="min-h-screen bg-violet">
+    <div className="min-h-screen w-full max-w-full bg-violet overflow-x-clip">
       {/* Grain Overlay */}
       <div className="grain-overlay" />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-violet/95 backdrop-blur-md border-b border-white/10">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
+      <header
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+        }}
+        className="fixed top-0 inset-x-0 w-full z-[120] overflow-x-clip bg-violet/95 backdrop-blur-md border-b border-white/10"
+      >
+        <div
+          className="flex w-full max-w-full items-center justify-between h-16 px-2.5 sm:px-4 lg:px-6"
+          style={{
+            paddingLeft: 'calc(env(safe-area-inset-left) + 0.75rem)',
+            paddingRight: 'calc(env(safe-area-inset-right) + 0.75rem)',
+          }}
+        >
           {/* Left: Logo & Back */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center hover:scale-105 transition-transform shadow-sticker"
             >
               <ArrowLeft className="w-5 h-5 text-dark" />
             </button>
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex min-w-0 items-center gap-2 group">
               <div className="w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sticker">
                 <img
                   src="/favicon/favicon-32x32.png?v=20260305"
@@ -104,7 +115,7 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl border-[3px] border-black shadow-sticker-lg overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-1rem)] bg-white rounded-2xl border-[3px] border-black shadow-sticker-lg overflow-hidden"
                   >
                     <div className="max-h-96 overflow-y-auto p-4">
                       <p className="font-display font-bold text-dark text-sm mb-3">PDF Tools</p>
@@ -166,7 +177,7 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center shadow-sticker"
+              className="lg:hidden w-10 h-10 bg-white rounded-xl border-[3px] border-black flex items-center justify-center shadow-sticker shrink-0"
             >
               {isSidebarOpen ? (
                 <X className="w-5 h-5 text-dark" />
@@ -185,7 +196,7 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 lg:hidden"
+            className="fixed inset-0 z-[130] lg:hidden overflow-x-hidden"
           >
             <div
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -195,8 +206,12 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-16 bottom-0 w-80 bg-white border-l-[3px] border-black overflow-y-auto"
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                top: 'calc(4rem + env(safe-area-inset-top))',
+                right: 'env(safe-area-inset-right)',
+              }}
+              className="absolute right-0 bottom-0 box-border w-full max-w-[20rem] bg-white border-l-[3px] border-black overflow-y-auto overflow-x-hidden"
             >
               <div className="p-4">
                 <p className="font-display font-bold text-dark text-sm mb-3">PDF Tools</p>
@@ -254,7 +269,10 @@ export default function ToolLayout({ children, toolName, toolDescription, icon }
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="pt-16 min-h-screen">
+      <main
+        className="min-h-screen"
+        style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))' }}
+      >
         {children}
       </main>
     </div>

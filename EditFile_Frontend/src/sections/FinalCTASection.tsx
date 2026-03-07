@@ -18,6 +18,11 @@ export default function FinalCTASection() {
     if (!section || !headline || !card) return;
 
     const ctx = gsap.context(() => {
+      const shouldPin = window.matchMedia('(min-width: 1024px)').matches;
+      if (!shouldPin) {
+        return;
+      }
+
       gsap.set([headline, card], {
         force3D: true,
         willChange: 'transform, opacity',
@@ -72,32 +77,32 @@ export default function FinalCTASection() {
   return (
     <section
       ref={sectionRef}
-      className="section-pinned bg-white z-[70] flex items-center"
+      className="section-pinned bg-white z-[70] flex items-start lg:items-center"
     >
-      <div className="w-full px-6 lg:px-12">
-        <div className="relative flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-0">
+      <div className="w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 lg:pt-0 pb-8 sm:pb-12 lg:pb-0">
+        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 lg:gap-0">
           {/* Left: Headline */}
           <div
             ref={headlineRef}
             className="w-full lg:w-[46vw] lg:pl-[7vw]"
           >
             <h2 className="font-display font-bold uppercase tracking-tight">
-              <span className="block text-dark text-[clamp(40px,6vw,72px)] leading-[0.95]">
+              <span className="block text-dark text-[clamp(32px,10vw,72px)] leading-[0.95]">
                 Ready
               </span>
-              <span className="block text-dark text-[clamp(40px,6vw,72px)] leading-[0.95]">
+              <span className="block text-dark text-[clamp(32px,10vw,72px)] leading-[0.95]">
                 When You
               </span>
-              <span className="block text-pink text-[clamp(40px,6vw,72px)] leading-[0.95]">
+              <span className="block text-pink text-[clamp(32px,10vw,72px)] leading-[0.95]">
                 Are
               </span>
             </h2>
 
-            <p className="mt-6 lg:mt-8 text-gray text-lg lg:text-xl max-w-md leading-relaxed">
+            <p className="mt-5 sm:mt-6 lg:mt-8 text-gray text-base sm:text-lg lg:text-xl max-w-md leading-relaxed">
               No signup. No watermarks. Just results.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="mt-7 sm:mt-8 flex flex-wrap items-start sm:items-center gap-3 sm:gap-4">
               <a
                 href="#tools"
                 className="sticker-button group animate-pulse-soft"
@@ -116,9 +121,9 @@ export default function FinalCTASection() {
             ref={cardRef}
             className="w-full lg:w-[40vw] lg:h-[56vh] lg:absolute lg:right-[6vw] lg:top-1/2 lg:-translate-y-1/2"
           >
-            <div className="sticker-card h-full p-6 lg:p-8 flex flex-col rotate-1">
+            <div className="sticker-card h-full p-4 sm:p-6 lg:p-8 flex flex-col rotate-1">
               {/* Upload Zone */}
-              <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-8 hover:border-pink hover:bg-pink/5 transition-colors cursor-pointer group">
+              <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-5 sm:p-8 hover:border-pink hover:bg-pink/5 transition-colors cursor-pointer group">
                 <div className="w-16 h-16 bg-violet/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-violet/20 transition-colors">
                   <Upload className="w-8 h-8 text-violet" />
                 </div>

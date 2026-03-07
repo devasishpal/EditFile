@@ -97,7 +97,7 @@ export default function JPGToPDF() {
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <label className="font-display font-bold text-dark">
             Margin
           </label>

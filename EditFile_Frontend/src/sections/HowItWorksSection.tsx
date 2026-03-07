@@ -53,15 +53,15 @@ export default function HowItWorksSection() {
     <section
       ref={sectionRef}
       id="how-it-works"
-      className="relative bg-violet py-20 lg:py-32 z-40"
+      className="relative bg-violet py-16 sm:py-20 lg:py-32 z-40"
     >
-      <div className="w-full px-6 lg:px-12">
+      <div className="w-full px-4 sm:px-6 lg:px-12">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
-          <h2 className="font-display font-bold text-4xl lg:text-5xl text-white uppercase tracking-tight">
+          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
             How It <span className="text-pink">Works</span>
           </h2>
-          <p className="text-white/70 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-white/70 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
             Three simple steps to transform your files. No technical knowledge needed.
           </p>
         </div>
@@ -88,7 +88,7 @@ export default function HowItWorksSection() {
                   ref={(el) => { stepsRef.current[index] = el; }}
                   className="relative"
                 >
-                  <div className="sticker-card p-8 text-center h-full">
+                  <div className="sticker-card p-6 sm:p-8 text-center h-full">
                     {/* Step Number */}
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="sticker-label bg-pink text-white border-pink font-mono text-sm">
@@ -97,8 +97,8 @@ export default function HowItWorksSection() {
                     </div>
 
                     {/* Icon */}
-                    <div className="w-20 h-20 bg-violet/10 rounded-2xl flex items-center justify-center mx-auto mt-4 mb-6">
-                      <Icon className="w-10 h-10 text-violet" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-violet/10 rounded-2xl flex items-center justify-center mx-auto mt-4 mb-6">
+                      <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-violet" />
                     </div>
 
                     {/* Content */}
