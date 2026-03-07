@@ -18,6 +18,11 @@ export default function FinalCTASection() {
     if (!section || !headline || !card) return;
 
     const ctx = gsap.context(() => {
+      gsap.set([headline, card], {
+        force3D: true,
+        willChange: 'transform, opacity',
+      });
+
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: section,

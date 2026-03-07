@@ -22,6 +22,11 @@ export default function HowItWorksSection() {
     if (!section || steps.length === 0) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(steps, {
+        force3D: true,
+        willChange: 'transform, opacity',
+      });
+
       steps.forEach((step, i) => {
         gsap.fromTo(
           step,

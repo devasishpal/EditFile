@@ -118,6 +118,11 @@ export default function ToolsSection() {
     if (!section || !header) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(header, {
+        force3D: true,
+        willChange: 'transform, opacity',
+      });
+
       gsap.fromTo(
         header,
         { y: 40, opacity: 0 },

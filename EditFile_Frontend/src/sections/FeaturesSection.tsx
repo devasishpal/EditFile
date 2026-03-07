@@ -22,6 +22,11 @@ export default function FeaturesSection() {
     if (!section || cards.length === 0) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(cards, {
+        force3D: true,
+        willChange: 'transform, opacity',
+      });
+
       cards.forEach((card, i) => {
         gsap.fromTo(
           card,

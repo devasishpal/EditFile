@@ -19,6 +19,22 @@ function App() {
   const snapTriggerRef = useRef<ScrollTrigger | null>(null);
 
   useEffect(() => {
+    gsap.config({
+      force3D: true,
+      nullTargetWarn: false,
+    });
+
+    ScrollTrigger.config({
+      ignoreMobileResize: true,
+      autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load',
+    });
+
+    ScrollTrigger.defaults({
+      anticipatePin: 1,
+    });
+  }, []);
+
+  useEffect(() => {
     // Wait for all sections to mount and create their ScrollTriggers
     const timer = setTimeout(() => {
       const pinned = ScrollTrigger.getAll()

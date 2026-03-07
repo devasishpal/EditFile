@@ -20,6 +20,11 @@ export default function HeroSection() {
     if (!section || !headline || !card) return;
 
     const ctx = gsap.context(() => {
+      gsap.set([headline, card, ...micros], {
+        force3D: true,
+        willChange: 'transform, opacity',
+      });
+
       // Initial load animation
       const loadTl = gsap.timeline({ delay: 0.2 });
 
