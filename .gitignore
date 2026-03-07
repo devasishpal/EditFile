@@ -1,0 +1,44 @@
+# Dependencies
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+**/coverage/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Logs and runtime artifacts
+*.log
+**/.runlogs/
+**/.backend*.log
+**/.frontend*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Local/generated data
+**/storage/
+**/outputs/
+**/.local-storage/
+*.zip.meta.json
+*.pdf.meta.json
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE/OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

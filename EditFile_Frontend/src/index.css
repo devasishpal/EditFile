@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 252 100% 65%;
+    --foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 328 100% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 7%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 328 100% 59%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 0%;
+    --input: 0 0% 90%;
+    --ring: 328 100% 59%;
+    --radius: 1rem;
+    
+    --violet: #6B4DFF;
+    --hot-pink: #FF2D8F;
+    --white: #FFFFFF;
+    --black: #111111;
+    --gray: #6B6B6B;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-[#6B4DFF] text-white antialiased;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+  
+  code, pre, .mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+}
+
+@layer components {
+  .sticker-card {
+    @apply bg-white rounded-2xl border-[3px] border-black;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  }
+  
+  .sticker-label {
+    @apply inline-flex items-center px-3 py-1 bg-white rounded-full border-[2.5px] border-black text-dark text-xs font-bold uppercase tracking-wider;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+  
+  .sticker-button {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-[#FF2D8F] text-white font-semibold rounded-xl border-[3px] border-black transition-all duration-200;
+    box-shadow: 0 8px 24px rgba(255, 45, 143, 0.35);
+  }
+  
+  .sticker-button:hover {
+    @apply scale-105;
+    box-shadow: 0 12px 32px rgba(255, 45, 143, 0.45);
+  }
+  
+  .sticker-button-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-white text-black font-semibold rounded-xl border-[3px] border-black transition-all duration-200;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  
+  .sticker-button-secondary:hover {
+    @apply scale-105;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  }
+
+  .sticker-card input:not([type="file"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  .sticker-card textarea,
+  .sticker-card select {
+    @apply text-dark caret-black;
+  }
+
+  .sticker-card input:not([type="file"]):not([type="range"]):not([type="checkbox"]):not([type="radio"])::placeholder,
+  .sticker-card textarea::placeholder {
+    @apply text-gray;
+  }
+  
+  .accent-block {
+    @apply bg-[#FF2D8F] rounded-2xl border-[3px] border-black;
+    box-shadow: 0 18px 40px rgba(255, 45, 143, 0.25);
+  }
+  
+  .grain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+  
+  .section-pinned {
+    @apply w-screen h-screen relative overflow-hidden;
+  }
+  
+  .text-accent {
+    color: var(--hot-pink);
+  }
+  
+  .text-white-primary {
+    color: var(--white);
+  }
+  
+  .bg-violet-primary {
+    background-color: var(--violet);
+  }
+  
+  .nav-link {
+    @apply text-white/80 hover:text-white font-medium transition-colors duration-200;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Selection */
+::selection {
+  background: rgba(255, 45, 143, 0.4);
+  color: white;
+}
+
+.cropper-editor .cropper-view-box {
+  outline: 2px dotted #ffffff;
+  outline-offset: -2px;
+}
+
+.cropper-editor .cropper-container,
+.cropper-editor .cropper-wrap-box,
+.cropper-editor .cropper-canvas,
+.cropper-editor .cropper-drag-box {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.cropper-editor .cropper-face {
+  background-color: transparent;
+}
