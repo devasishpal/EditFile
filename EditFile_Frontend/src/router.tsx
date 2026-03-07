@@ -25,6 +25,14 @@ import RemoveBackground from '@/tools/RemoveBackground';
 import ImageWatermark from '@/tools/ImageWatermark';
 import PdfToolsPage from '@/pages/PdfToolsPage';
 import JpegToolsPage from '@/pages/JpegToolsPage';
+import AboutPage from '@/pages/AboutPage';
+import BlogPage from '@/pages/BlogPage';
+import CareersPage from '@/pages/CareersPage';
+import ContactPage from '@/pages/ContactPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
+import TermsOfServicePage from '@/pages/TermsOfServicePage';
+import CookiePolicyPage from '@/pages/CookiePolicyPage';
+import GdprPage from '@/pages/GdprPage';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +50,38 @@ export const router = createBrowserRouter([
   {
     path: '/jpeg-tools',
     element: <Navigate to="/image-tools" replace />,
+  },
+  {
+    path: '/about',
+    element: <AboutPage />,
+  },
+  {
+    path: '/blog',
+    element: <BlogPage />,
+  },
+  {
+    path: '/careers',
+    element: <CareersPage />,
+  },
+  {
+    path: '/contact',
+    element: <ContactPage />,
+  },
+  {
+    path: '/privacy-policy',
+    element: <PrivacyPolicyPage />,
+  },
+  {
+    path: '/terms-of-service',
+    element: <TermsOfServicePage />,
+  },
+  {
+    path: '/cookie-policy',
+    element: <CookiePolicyPage />,
+  },
+  {
+    path: '/gdpr',
+    element: <GdprPage />,
   },
   {
     path: '/rotate-pdf',

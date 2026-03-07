@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Twitter, Github, Linkedin, Mail } from 'lucide-react';
 
 const footerLinks = {
@@ -9,16 +10,16 @@ const footerLinks = {
     { name: 'API Access', href: '#' },
   ],
   company: [
-    { name: 'About Us', href: '#' },
-    { name: 'Blog', href: '#' },
-    { name: 'Careers', href: '#' },
-    { name: 'Contact', href: '#' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Careers', href: '/careers' },
+    { name: 'Contact', href: '/contact' },
   ],
   legal: [
-    { name: 'Privacy Policy', href: '#' },
-    { name: 'Terms of Service', href: '#' },
-    { name: 'Cookie Policy', href: '#' },
-    { name: 'GDPR', href: '#' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms of Service', href: '/terms-of-service' },
+    { name: 'Cookie Policy', href: '/cookie-policy' },
+    { name: 'GDPR', href: '/gdpr' },
   ],
 };
 
@@ -91,12 +92,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-gray hover:text-violet transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -107,12 +108,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-gray hover:text-violet transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -128,7 +129,7 @@ export default function Footer() {
           className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <p className="text-gray text-sm">
-            © 2026 EditFile. All rights reserved.
+            (c) 2026 EditFile. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <span className="sticker-label text-[10px] bg-violet text-white border-violet">
@@ -140,3 +141,4 @@ export default function Footer() {
     </footer>
   );
 }
+
