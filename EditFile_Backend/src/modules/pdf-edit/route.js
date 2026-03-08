@@ -275,7 +275,7 @@ router.post(
     });
 
     const outputBuffer = Buffer.from(await pdfDoc.save());
-    const outputName = `${sanitizeBaseName(file.originalname)}-rotated.pdf`;
+    const outputName = `${sanitizeBaseName(file.originalname)}.pdf`;
     sendPdf(res, outputBuffer, outputName);
   })
 );
@@ -303,7 +303,7 @@ router.post(
     });
 
     const outputBuffer = Buffer.from(await pdfDoc.save());
-    const outputName = `${sanitizeBaseName(file.originalname)}-pages-deleted.pdf`;
+    const outputName = `${sanitizeBaseName(file.originalname)}.pdf`;
     sendPdf(res, outputBuffer, outputName);
   })
 );
@@ -358,7 +358,7 @@ router.post(
     });
 
     const outputBuffer = Buffer.from(await pdfDoc.save());
-    const outputName = `${sanitizeBaseName(file.originalname)}-numbered.pdf`;
+    const outputName = `${sanitizeBaseName(file.originalname)}.pdf`;
     sendPdf(res, outputBuffer, outputName);
   })
 );
@@ -453,7 +453,7 @@ router.post(
     }
 
     const outputBuffer = Buffer.from(await pdfDoc.save());
-    const outputName = `${sanitizeBaseName(sourceFile.originalname)}-watermarked.pdf`;
+    const outputName = `${sanitizeBaseName(sourceFile.originalname)}.pdf`;
     sendPdf(res, outputBuffer, outputName);
   })
 );

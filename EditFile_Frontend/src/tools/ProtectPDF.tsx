@@ -25,6 +25,11 @@ const createFileId = () => Math.random().toString(36).slice(2, 11);
 const isPdfFile = (file: File) =>
   file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
+const ensurePdfExtension = (fileName: string) =>
+  fileName.toLowerCase().endsWith('.pdf')
+    ? fileName
+    : `${fileName.replace(/\.[^.]+$/, '')}.pdf`;
+
 export default function ProtectPDF() {
   const [fileItem, setFileItem] = useState<ProtectFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -171,7 +176,7 @@ export default function ProtectPDF() {
               ...prev,
               status: 'completed',
               downloadUrl: downloadInfo.downloadUrl,
-              outputName: downloadInfo.fileName || 'protected.pdf',
+              outputName: downloadInfo.fileName || ensurePdfExtension(prev.name),
               error: undefined,
             }
           : prev
@@ -201,7 +206,10 @@ export default function ProtectPDF() {
     }
 
     if (fileItem.downloadUrl) {
-      startFileDownload(fileItem.downloadUrl, fileItem.outputName || 'protected.pdf');
+      startFileDownload(
+        fileItem.downloadUrl,
+        fileItem.outputName || ensurePdfExtension(fileItem.name)
+      );
       return;
     }
 

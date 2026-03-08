@@ -32,7 +32,7 @@ const thumbnailBuffer = async ({ imageBuffer, originalName, mimeType, width, hei
   });
 
   return {
-    fileName: `${getBaseName(originalName, 'image')}-thumbnail.${extension}`,
+    fileName: `${getBaseName(originalName, 'image')}.${extension}`,
     contentType: getMimeTypeForFormat(format),
     buffer: outputBuffer,
     size: outputBuffer.length,
@@ -94,7 +94,7 @@ export const processImageThumbnail = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-thumbnail`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

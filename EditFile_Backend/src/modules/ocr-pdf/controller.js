@@ -26,7 +26,7 @@ const getSafeOutputFileName = (originalName, outputFormat) => {
     .replace(/[\\/:*?"<>|]+/g, '-')
     .replace(/\.[^.]+$/, '')
     .trim() || 'document';
-  return `${baseName}-ocr.${extension}`;
+  return `${baseName}.${extension}`;
 };
 
 export const ocrPdf = asyncHandler(async (req, res) => {

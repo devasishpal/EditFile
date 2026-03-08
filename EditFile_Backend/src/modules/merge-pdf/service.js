@@ -5,6 +5,7 @@ import { updateJobStatus, completeJob, failJob } from '../../services/database.s
 import { logger } from '../../utils/logger.js';
 import { ensurePdfCliDependencies, runCliCommand } from '../../utils/pdf-cli.js';
 import { createTempWorkspace, removePathSafe } from '../../utils/workspace.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const MERGE_TIMEOUT_MS = Number.parseInt(process.env.MERGE_PDF_TIMEOUT_MS || '600000', 10);
 
@@ -64,7 +65,7 @@ const runMergeWithGhostscript = async (ghostscriptPath, inputPaths, outputPath) 
 };
 
 export const processMergePdf = async (jobData) => {
-  const { jobId, fileUrls } = jobData;
+  const { jobId, fileUrls, originalNames } = jobData;
 
   logger.info(`Starting PDF merge: ${jobId}, files: ${fileUrls?.length || 0}`);
 
@@ -129,7 +130,16 @@ export const processMergePdf = async (jobData) => {
       throw new Error('Merged PDF generation failed.');
     }
 
-    const outputFileName = 'merged.pdf';
+    const primaryOriginalName =
+      (Array.isArray(originalNames) && originalNames[0]) ||
+      fileUrls[0]?.name ||
+      'merged.pdf';
+    const outputFileName = buildFileName({
+      originalName: primaryOriginalName,
+      extension: 'pdf',
+      fallbackBase: 'merged',
+      useOutputSuffix: true,
+    });
     const outputKey = generateS3Key(jobId, outputFileName, 'outputs');
     const outputUrl = await uploadFile(mergedBuffer, outputKey, 'application/pdf');
 

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import App from '@/App';
 import ToolLayout from '@/components/ToolLayout';
@@ -6,6 +7,10 @@ import MergePDF from '@/tools/MergePDF';
 import SplitPDF from '@/tools/SplitPDF';
 import PDFToWord from '@/tools/PDFToWord';
 import WordToPDF from '@/tools/WordToPDF';
+import ExcelToPDF from '@/tools/ExcelToPDF';
+import PDFToExcel from '@/tools/PDFToExcel';
+import PowerPointToPDF from '@/tools/PowerPointToPDF';
+import PDFToPowerPoint from '@/tools/PDFToPowerPoint';
 import PDFToJPG from '@/tools/PDFToJPG';
 import JPGToPDF from '@/tools/JPGToPDF';
 import AddWatermark from '@/tools/AddWatermark';
@@ -37,6 +42,515 @@ import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import TermsOfServicePage from '@/pages/TermsOfServicePage';
 import CookiePolicyPage from '@/pages/CookiePolicyPage';
 import GdprPage from '@/pages/GdprPage';
+
+const toolPage = (
+  toolName: string,
+  toolDescription: string,
+  icon: string,
+  child: ReactElement
+) => (
+  <ToolLayout toolName={toolName} toolDescription={toolDescription} icon={icon}>
+    {child}
+  </ToolLayout>
+);
+
+const pdfToolRoutes = [
+  {
+    path: '/pdf-tools/compress-pdf',
+    element: toolPage(
+      'Compress PDF',
+      'Reduce PDF file size while maintaining quality',
+      'Minimize2',
+      <CompressPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/merge-pdf',
+    element: toolPage(
+      'Merge PDF',
+      'Combine multiple PDFs into one document',
+      'Combine',
+      <MergePDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/split-pdf',
+    element: toolPage(
+      'Split PDF',
+      'Extract pages or split by range',
+      'Scissors',
+      <SplitPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/extract-pages',
+    element: toolPage(
+      'Extract Pages',
+      'Save specific pages as new PDF',
+      'FileOutput',
+      <SplitPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-word',
+    element: toolPage(
+      'PDF to Word',
+      'Convert PDF to editable DOCX',
+      'FileText',
+      <PDFToWord />
+    ),
+  },
+  {
+    path: '/pdf-tools/word-to-pdf',
+    element: toolPage(
+      'Word to PDF',
+      'Convert DOCX to PDF',
+      'FileType',
+      <WordToPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-jpg',
+    element: toolPage(
+      'PDF to JPG',
+      'Convert PDF pages to images',
+      'Image',
+      <PDFToJPG />
+    ),
+  },
+  {
+    path: '/pdf-tools/jpg-to-pdf',
+    element: toolPage(
+      'JPG to PDF',
+      'Convert JPG images into a PDF',
+      'Images',
+      <JPGToPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/scan-to-pdf',
+    element: toolPage(
+      'Scan to PDF',
+      'Convert scanned images into a PDF',
+      'ScanText',
+      <JPGToPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/powerpoint-to-pdf',
+    element: toolPage(
+      'PowerPoint to PDF',
+      'Convert PPT/PPTX slides into PDF',
+      'FileType',
+      <PowerPointToPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/excel-to-pdf',
+    element: toolPage(
+      'Excel to PDF',
+      'Convert XLS/XLSX spreadsheets into PDF',
+      'FileType',
+      <ExcelToPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/html-to-pdf',
+    element: toolPage(
+      'HTML to PDF',
+      'Convert HTML files into PDF',
+      'FileType',
+      <ComingSoonTool
+        title="HTML to PDF is added"
+        message="The tool page and route are ready. Backend conversion wiring can be enabled next."
+        suggestedToolHref="/pdf-tools/word-to-pdf"
+        suggestedToolLabel="Word to PDF"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-powerpoint',
+    element: toolPage(
+      'PDF to PowerPoint',
+      'Convert PDF pages into PPT slides',
+      'FileText',
+      <PDFToPowerPoint />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-excel',
+    element: toolPage(
+      'PDF to Excel',
+      'Extract PDF tables into spreadsheet format',
+      'FileText',
+      <PDFToExcel />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-pdfa',
+    element: toolPage(
+      'PDF to PDF/A',
+      'Convert PDF files into archival PDF/A format',
+      'FileOutput',
+      <ComingSoonTool
+        title="PDF to PDF/A is added"
+        message="The tool page and route are ready. PDF/A conversion processing is pending."
+        suggestedToolHref="/pdf-tools/repair-pdf"
+        suggestedToolLabel="Repair PDF"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/edit-pdf',
+    element: toolPage(
+      'Edit PDF',
+      'Edit text, images, and page layout in PDF files',
+      'FileText',
+      <ComingSoonTool
+        title="Edit PDF is added"
+        message="The tool page and route are ready. Rich content editing controls are pending."
+        suggestedToolHref="/pdf-tools/organize-pdf"
+        suggestedToolLabel="Organize PDF"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/crop-pdf',
+    element: toolPage(
+      'Crop PDF',
+      'Crop PDF pages to remove unwanted margins',
+      'Crop',
+      <ComingSoonTool
+        title="Crop PDF is added"
+        message="The tool page and route are ready. Crop rectangle processing is pending."
+        suggestedToolHref="/pdf-tools/organize-pdf"
+        suggestedToolLabel="Organize PDF"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/sign-pdf',
+    element: toolPage(
+      'Sign PDF',
+      'Add signatures to PDF files',
+      'FileText',
+      <ComingSoonTool
+        title="Sign PDF is added"
+        message="The tool page and route are ready. Signature workflow integration is pending."
+        suggestedToolHref="/pdf-tools/add-watermark"
+        suggestedToolLabel="Add Watermark"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/redact-pdf',
+    element: toolPage(
+      'Redact PDF',
+      'Hide sensitive information permanently',
+      'Trash2',
+      <ComingSoonTool
+        title="Redact PDF is added"
+        message="The tool page and route are ready. Permanent redaction processing is pending."
+        suggestedToolHref="/pdf-tools/delete-pages"
+        suggestedToolLabel="Remove Pages"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/compare-pdf',
+    element: toolPage(
+      'Compare PDF',
+      'Compare documents and inspect differences',
+      'LayoutGrid',
+      <ComingSoonTool
+        title="Compare PDF is added"
+        message="The tool page and route are ready. Diff analysis processing is pending."
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/translate-pdf',
+    element: toolPage(
+      'Translate PDF',
+      'Translate PDF content to another language',
+      'RefreshCw',
+      <ComingSoonTool
+        title="Translate PDF is added"
+        message="The tool page and route are ready. Translation engine integration is pending."
+        suggestedToolHref="/pdf-tools/ocr-pdf"
+        suggestedToolLabel="OCR PDF"
+      />
+    ),
+  },
+  {
+    path: '/pdf-tools/rotate-pdf',
+    element: toolPage(
+      'Rotate PDF',
+      'Rotate all pages or selected pages',
+      'RotateCw',
+      <RotatePDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/delete-pages',
+    element: toolPage(
+      'Delete Pages',
+      'Remove selected pages from your PDF',
+      'Trash2',
+      <DeletePDFPages />
+    ),
+  },
+  {
+    path: '/pdf-tools/add-page-numbers',
+    element: toolPage(
+      'Add Page Numbers',
+      'Insert page numbers in your preferred position',
+      'Hash',
+      <AddPageNumbers />
+    ),
+  },
+  {
+    path: '/pdf-tools/add-watermark',
+    element: toolPage(
+      'Add Watermark',
+      'Add text or image watermarks',
+      'Droplets',
+      <AddWatermark />
+    ),
+  },
+  {
+    path: '/pdf-tools/protect-pdf',
+    element: toolPage(
+      'Protect PDF',
+      'Password protect your PDF files',
+      'Lock',
+      <ProtectPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/unlock-pdf',
+    element: toolPage(
+      'Unlock PDF',
+      'Remove password from protected PDFs',
+      'Unlock',
+      <UnlockPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/ocr-pdf',
+    element: toolPage(
+      'OCR PDF',
+      'Extract text from scanned PDFs',
+      'ScanText',
+      <OCRPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/repair-pdf',
+    element: toolPage(
+      'Repair PDF',
+      'Fix corrupted PDF files',
+      'Wrench',
+      <RepairPDF />
+    ),
+  },
+  {
+    path: '/pdf-tools/organize-pdf',
+    element: toolPage(
+      'Organize PDF',
+      'Drag and reorder pages visually',
+      'LayoutGrid',
+      <OrganizePDF />
+    ),
+  },
+];
+
+const imageToolRoutes = [
+  {
+    path: '/image-tools/compress-image',
+    element: toolPage(
+      'Compress Image',
+      'Reduce image size with quality control',
+      'Minimize2',
+      <CompressJPEG />
+    ),
+  },
+  {
+    path: '/image-tools/resize-image',
+    element: toolPage(
+      'Resize Image',
+      'Change dimensions with aspect lock',
+      'Maximize2',
+      <ResizeImage />
+    ),
+  },
+  {
+    path: '/image-tools/crop-image',
+    element: toolPage(
+      'Crop Image',
+      'Crop to exact dimensions',
+      'Crop',
+      <CropImage />
+    ),
+  },
+  {
+    path: '/image-tools/rotate-image',
+    element: toolPage(
+      'Rotate Image',
+      'Rotate and flip images',
+      'RotateCw',
+      <RotateImage />
+    ),
+  },
+  {
+    path: '/image-tools/convert-image',
+    element: toolPage(
+      'Convert Image',
+      'PNG <-> JPG <-> WEBP conversion',
+      'RefreshCw',
+      <ConvertImage />
+    ),
+  },
+  {
+    path: '/image-tools/image-to-pdf',
+    element: toolPage(
+      'Image to PDF',
+      'Convert images to PDF document',
+      'FileImage',
+      <ImageToPDF />
+    ),
+  },
+  {
+    path: '/image-tools/remove-background',
+    element: toolPage(
+      'Remove Background',
+      'AI-powered background removal',
+      'Wand2',
+      <RemoveBackground />
+    ),
+  },
+  {
+    path: '/image-tools/passport-photo-maker',
+    element: toolPage(
+      'Passport Size Photo Maker',
+      'Crop, remove background, and export passport-size photo',
+      'Wand2',
+      <PassportSizePhotoMaker />
+    ),
+  },
+  {
+    path: '/image-tools/image-watermark',
+    element: toolPage(
+      'Image Watermark',
+      'Add text or image watermark to your image',
+      'Droplets',
+      <ImageWatermark />
+    ),
+  },
+  {
+    path: '/image-tools/compress-jpeg',
+    element: <Navigate to="/image-tools/compress-image" replace />,
+  },
+];
+
+const pdfToolSlugs = [
+  'compress-pdf',
+  'merge-pdf',
+  'split-pdf',
+  'extract-pages',
+  'pdf-to-word',
+  'word-to-pdf',
+  'pdf-to-jpg',
+  'jpg-to-pdf',
+  'scan-to-pdf',
+  'powerpoint-to-pdf',
+  'excel-to-pdf',
+  'html-to-pdf',
+  'pdf-to-powerpoint',
+  'pdf-to-excel',
+  'pdf-to-pdfa',
+  'edit-pdf',
+  'crop-pdf',
+  'sign-pdf',
+  'redact-pdf',
+  'compare-pdf',
+  'translate-pdf',
+  'rotate-pdf',
+  'delete-pages',
+  'add-page-numbers',
+  'add-watermark',
+  'protect-pdf',
+  'unlock-pdf',
+  'ocr-pdf',
+  'repair-pdf',
+  'organize-pdf',
+];
+
+const imageToolSlugs = [
+  'compress-image',
+  'resize-image',
+  'crop-image',
+  'rotate-image',
+  'convert-image',
+  'image-to-pdf',
+  'remove-background',
+  'passport-photo-maker',
+  'image-watermark',
+];
+
+const legacyStandaloneRedirects = [
+  {
+    path: '/rotate-pdf',
+    element: <Navigate to="/pdf-tools/rotate-pdf" replace />,
+  },
+  {
+    path: '/delete-pages',
+    element: <Navigate to="/pdf-tools/delete-pages" replace />,
+  },
+  {
+    path: '/add-page-numbers',
+    element: <Navigate to="/pdf-tools/add-page-numbers" replace />,
+  },
+  {
+    path: '/add-watermark',
+    element: <Navigate to="/pdf-tools/add-watermark" replace />,
+  },
+];
+
+const legacyToolsRedirectRoutes = [
+  {
+    path: '/tools',
+    element: <Navigate to="/pdf-tools" replace />,
+  },
+  {
+    path: '/tools/pdf',
+    element: <Navigate to="/pdf-tools" replace />,
+  },
+  {
+    path: '/tools/jpeg',
+    element: <Navigate to="/image-tools" replace />,
+  },
+  {
+    path: '/tools/image',
+    element: <Navigate to="/image-tools" replace />,
+  },
+  ...pdfToolSlugs.map((slug) => ({
+    path: `/tools/${slug}`,
+    element: <Navigate to={`/pdf-tools/${slug}`} replace />,
+  })),
+  ...imageToolSlugs.map((slug) => ({
+    path: `/tools/${slug}`,
+    element: <Navigate to={`/image-tools/${slug}`} replace />,
+  })),
+  {
+    path: '/tools/compress-jpeg',
+    element: <Navigate to="/image-tools/compress-image" replace />,
+  },
+  {
+    path: '/tools/*',
+    element: <Navigate to="/pdf-tools" replace />,
+  },
+];
 
 export const router = createBrowserRouter([
   {
@@ -87,577 +601,10 @@ export const router = createBrowserRouter([
     path: '/gdpr',
     element: <GdprPage />,
   },
-  {
-    path: '/rotate-pdf',
-    element: (
-      <ToolLayout
-        toolName="Rotate PDF"
-        toolDescription="Rotate all pages or selected pages"
-        icon="RotateCw"
-      >
-        <RotatePDF />
-      </ToolLayout>
-    ),
-  },
-  {
-    path: '/delete-pages',
-    element: (
-      <ToolLayout
-        toolName="Delete Pages"
-        toolDescription="Remove selected pages from your PDF"
-        icon="Trash2"
-      >
-        <DeletePDFPages />
-      </ToolLayout>
-    ),
-  },
-  {
-    path: '/add-page-numbers',
-    element: (
-      <ToolLayout
-        toolName="Add Page Numbers"
-        toolDescription="Insert page numbers in your preferred position"
-        icon="Hash"
-      >
-        <AddPageNumbers />
-      </ToolLayout>
-    ),
-  },
-  {
-    path: '/add-watermark',
-    element: (
-      <ToolLayout
-        toolName="Add Watermark"
-        toolDescription="Add text or image watermarks"
-        icon="Droplets"
-      >
-        <AddWatermark />
-      </ToolLayout>
-    ),
-  },
-  {
-    path: '/tools',
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/pdf-tools" replace />,
-      },
-      {
-        path: 'pdf',
-        element: <Navigate to="/pdf-tools" replace />,
-      },
-      {
-        path: 'jpeg',
-        element: <Navigate to="/image-tools" replace />,
-      },
-      {
-        path: 'image',
-        element: <Navigate to="/image-tools" replace />,
-      },
-      {
-        path: 'compress-pdf',
-        element: (
-          <ToolLayout
-            toolName="Compress PDF"
-            toolDescription="Reduce PDF file size while maintaining quality"
-            icon="Minimize2"
-          >
-            <CompressPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'merge-pdf',
-        element: (
-          <ToolLayout
-            toolName="Merge PDF"
-            toolDescription="Combine multiple PDFs into one document"
-            icon="Combine"
-          >
-            <MergePDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'split-pdf',
-        element: (
-          <ToolLayout
-            toolName="Split PDF"
-            toolDescription="Extract pages or split by range"
-            icon="Scissors"
-          >
-            <SplitPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'extract-pages',
-        element: (
-          <ToolLayout
-            toolName="Extract Pages"
-            toolDescription="Save specific pages as new PDF"
-            icon="FileOutput"
-          >
-            <SplitPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'pdf-to-word',
-        element: (
-          <ToolLayout
-            toolName="PDF to Word"
-            toolDescription="Convert PDF to editable DOCX"
-            icon="FileText"
-          >
-            <PDFToWord />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'word-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="Word to PDF"
-            toolDescription="Convert DOCX to PDF"
-            icon="FileType"
-          >
-            <WordToPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'pdf-to-jpg',
-        element: (
-          <ToolLayout
-            toolName="PDF to JPG"
-            toolDescription="Convert PDF pages to images"
-            icon="Image"
-          >
-            <PDFToJPG />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'jpg-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="JPG to PDF"
-            toolDescription="Convert JPG images into a PDF"
-            icon="Images"
-          >
-            <JPGToPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'scan-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="Scan to PDF"
-            toolDescription="Convert scanned images into a PDF"
-            icon="ScanText"
-          >
-            <JPGToPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'powerpoint-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="PowerPoint to PDF"
-            toolDescription="Convert PPT/PPTX slides into PDF"
-            icon="FileType"
-          >
-            <ComingSoonTool
-              title="PowerPoint to PDF is added"
-              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
-              suggestedToolHref="/tools/word-to-pdf"
-              suggestedToolLabel="Word to PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'excel-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="Excel to PDF"
-            toolDescription="Convert XLS/XLSX spreadsheets into PDF"
-            icon="FileType"
-          >
-            <ComingSoonTool
-              title="Excel to PDF is added"
-              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
-              suggestedToolHref="/tools/word-to-pdf"
-              suggestedToolLabel="Word to PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'html-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="HTML to PDF"
-            toolDescription="Convert HTML files into PDF"
-            icon="FileType"
-          >
-            <ComingSoonTool
-              title="HTML to PDF is added"
-              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
-              suggestedToolHref="/tools/word-to-pdf"
-              suggestedToolLabel="Word to PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'pdf-to-powerpoint',
-        element: (
-          <ToolLayout
-            toolName="PDF to PowerPoint"
-            toolDescription="Convert PDF pages into PPT slides"
-            icon="FileText"
-          >
-            <ComingSoonTool
-              title="PDF to PowerPoint is added"
-              message="The tool page and route are ready. Conversion pipeline setup is pending."
-              suggestedToolHref="/tools/pdf-to-word"
-              suggestedToolLabel="PDF to Word"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'pdf-to-excel',
-        element: (
-          <ToolLayout
-            toolName="PDF to Excel"
-            toolDescription="Extract PDF tables into spreadsheet format"
-            icon="FileText"
-          >
-            <ComingSoonTool
-              title="PDF to Excel is added"
-              message="The tool page and route are ready. Conversion pipeline setup is pending."
-              suggestedToolHref="/tools/pdf-to-word"
-              suggestedToolLabel="PDF to Word"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'pdf-to-pdfa',
-        element: (
-          <ToolLayout
-            toolName="PDF to PDF/A"
-            toolDescription="Convert PDF files into archival PDF/A format"
-            icon="FileOutput"
-          >
-            <ComingSoonTool
-              title="PDF to PDF/A is added"
-              message="The tool page and route are ready. PDF/A conversion processing is pending."
-              suggestedToolHref="/tools/repair-pdf"
-              suggestedToolLabel="Repair PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'edit-pdf',
-        element: (
-          <ToolLayout
-            toolName="Edit PDF"
-            toolDescription="Edit text, images, and page layout in PDF files"
-            icon="FileText"
-          >
-            <ComingSoonTool
-              title="Edit PDF is added"
-              message="The tool page and route are ready. Rich content editing controls are pending."
-              suggestedToolHref="/tools/organize-pdf"
-              suggestedToolLabel="Organize PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'crop-pdf',
-        element: (
-          <ToolLayout
-            toolName="Crop PDF"
-            toolDescription="Crop PDF pages to remove unwanted margins"
-            icon="Crop"
-          >
-            <ComingSoonTool
-              title="Crop PDF is added"
-              message="The tool page and route are ready. Crop rectangle processing is pending."
-              suggestedToolHref="/tools/organize-pdf"
-              suggestedToolLabel="Organize PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'sign-pdf',
-        element: (
-          <ToolLayout
-            toolName="Sign PDF"
-            toolDescription="Add signatures to PDF files"
-            icon="FileText"
-          >
-            <ComingSoonTool
-              title="Sign PDF is added"
-              message="The tool page and route are ready. Signature workflow integration is pending."
-              suggestedToolHref="/add-watermark"
-              suggestedToolLabel="Add Watermark"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'redact-pdf',
-        element: (
-          <ToolLayout
-            toolName="Redact PDF"
-            toolDescription="Hide sensitive information permanently"
-            icon="Trash2"
-          >
-            <ComingSoonTool
-              title="Redact PDF is added"
-              message="The tool page and route are ready. Permanent redaction processing is pending."
-              suggestedToolHref="/delete-pages"
-              suggestedToolLabel="Remove Pages"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'compare-pdf',
-        element: (
-          <ToolLayout
-            toolName="Compare PDF"
-            toolDescription="Compare documents and inspect differences"
-            icon="LayoutGrid"
-          >
-            <ComingSoonTool
-              title="Compare PDF is added"
-              message="The tool page and route are ready. Diff analysis processing is pending."
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'translate-pdf',
-        element: (
-          <ToolLayout
-            toolName="Translate PDF"
-            toolDescription="Translate PDF content to another language"
-            icon="RefreshCw"
-          >
-            <ComingSoonTool
-              title="Translate PDF is added"
-              message="The tool page and route are ready. Translation engine integration is pending."
-              suggestedToolHref="/tools/ocr-pdf"
-              suggestedToolLabel="OCR PDF"
-            />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'rotate-pdf',
-        element: <Navigate to="/rotate-pdf" replace />,
-      },
-      {
-        path: 'delete-pages',
-        element: <Navigate to="/delete-pages" replace />,
-      },
-      {
-        path: 'add-page-numbers',
-        element: <Navigate to="/add-page-numbers" replace />,
-      },
-      {
-        path: 'add-watermark',
-        element: <Navigate to="/add-watermark" replace />,
-      },
-      {
-        path: 'protect-pdf',
-        element: (
-          <ToolLayout
-            toolName="Protect PDF"
-            toolDescription="Password protect your PDF files"
-            icon="Lock"
-          >
-            <ProtectPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'unlock-pdf',
-        element: (
-          <ToolLayout
-            toolName="Unlock PDF"
-            toolDescription="Remove password from protected PDFs"
-            icon="Unlock"
-          >
-            <UnlockPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'ocr-pdf',
-        element: (
-          <ToolLayout
-            toolName="OCR PDF"
-            toolDescription="Extract text from scanned PDFs"
-            icon="ScanText"
-          >
-            <OCRPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'repair-pdf',
-        element: (
-          <ToolLayout
-            toolName="Repair PDF"
-            toolDescription="Fix corrupted PDF files"
-            icon="Wrench"
-          >
-            <RepairPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'organize-pdf',
-        element: (
-          <ToolLayout
-            toolName="Organize PDF"
-            toolDescription="Drag and reorder pages visually"
-            icon="LayoutGrid"
-          >
-            <OrganizePDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'compress-jpeg',
-        element: <Navigate to="/tools/compress-image" replace />,
-      },
-      {
-        path: 'compress-image',
-        element: (
-          <ToolLayout
-            toolName="Compress Image"
-            toolDescription="Reduce image size with quality control"
-            icon="Minimize2"
-          >
-            <CompressJPEG />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'resize-image',
-        element: (
-          <ToolLayout
-            toolName="Resize Image"
-            toolDescription="Change dimensions with aspect lock"
-            icon="Maximize2"
-          >
-            <ResizeImage />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'crop-image',
-        element: (
-          <ToolLayout
-            toolName="Crop Image"
-            toolDescription="Crop to exact dimensions"
-            icon="Crop"
-          >
-            <CropImage />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'rotate-image',
-        element: (
-          <ToolLayout
-            toolName="Rotate Image"
-            toolDescription="Rotate and flip images"
-            icon="RotateCw"
-          >
-            <RotateImage />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'convert-image',
-        element: (
-          <ToolLayout
-            toolName="Convert Image"
-            toolDescription="PNG <-> JPG <-> WEBP conversion"
-            icon="RefreshCw"
-          >
-            <ConvertImage />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'image-to-pdf',
-        element: (
-          <ToolLayout
-            toolName="Image to PDF"
-            toolDescription="Convert images to PDF document"
-            icon="FileImage"
-          >
-            <ImageToPDF />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'remove-background',
-        element: (
-          <ToolLayout
-            toolName="Remove Background"
-            toolDescription="AI-powered background removal"
-            icon="Wand2"
-          >
-            <RemoveBackground />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'passport-photo-maker',
-        element: (
-          <ToolLayout
-            toolName="Passport Size Photo Maker"
-            toolDescription="Crop, remove background, and export passport-size photo"
-            icon="Wand2"
-          >
-            <PassportSizePhotoMaker />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: 'image-watermark',
-        element: (
-          <ToolLayout
-            toolName="Image Watermark"
-            toolDescription="Add text or image watermark to your image"
-            icon="Droplets"
-          >
-            <ImageWatermark />
-          </ToolLayout>
-        ),
-      },
-      {
-        path: '*',
-        element: <Navigate to="/" replace />,
-      },
-    ],
-  },
+  ...pdfToolRoutes,
+  ...imageToolRoutes,
+  ...legacyStandaloneRedirects,
+  ...legacyToolsRedirectRoutes,
   {
     path: '*',
     element: <Navigate to="/" replace />,

@@ -2,23 +2,16 @@ import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
 import { convertWithLibreOffice } from '../../utils/libreoffice.js';
+import {
+  CONVERSION_FAILURE_MESSAGE,
+  getContentTypeForFormat,
+} from '../../utils/office-formats.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const ALLOWED_OUTPUT_FORMATS = new Set(['docx', 'doc', 'rtf']);
 
-const getContentTypeForFormat = (format) => {
-  if (format === 'doc') {
-    return 'application/msword';
-  }
-
-  if (format === 'rtf') {
-    return 'application/rtf';
-  }
-
-  return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-};
-
 export const processPdfToWord = async (jobData) => {
-  const { jobId, fileUrl, outputFormat } = jobData;
+  const { jobId, fileUrl, outputFormat, originalName = 'source.pdf' } = jobData;
   const normalizedFormat = String(outputFormat || 'docx').toLowerCase();
 
   logger.info(`Starting PDF to Word: ${jobId}`);
@@ -33,7 +26,7 @@ export const processPdfToWord = async (jobData) => {
     const pdfBuffer = await downloadFile(fileUrl);
     const outputBuffer = await convertWithLibreOffice(
       pdfBuffer,
-      'source.pdf',
+      originalName,
       normalizedFormat
     );
 
@@ -41,7 +34,11 @@ export const processPdfToWord = async (jobData) => {
       throw new Error('PDF to Word conversion produced an empty file.');
     }
 
-    const outputFileName = `converted.${normalizedFormat}`;
+    const outputFileName = buildFileName({
+      originalName,
+      extension: normalizedFormat,
+      fallbackBase: 'document',
+    });
     const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(
       outputBuffer,
@@ -52,6 +49,7 @@ export const processPdfToWord = async (jobData) => {
     await completeJob(jobId, outputUrl, outputBuffer.length);
     await updateJobStatus(jobId, 'completed', {
       metadata: {
+        originalName,
         outputFormat: normalizedFormat,
         outputFileName,
       },
@@ -69,8 +67,8 @@ export const processPdfToWord = async (jobData) => {
     
   } catch (error) {
     logger.error(`PDF to Word failed for job ${jobId}:`, error);
-    await failJob(jobId, error.message);
-    throw error;
+    await failJob(jobId, CONVERSION_FAILURE_MESSAGE);
+    throw new Error(CONVERSION_FAILURE_MESSAGE);
   }
 };
 

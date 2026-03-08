@@ -30,10 +30,14 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   if (err.code === 'LIMIT_FILE_SIZE') {
+    const sizeLimitMb = Number.isFinite(err?.limit)
+      ? Math.max(1, Math.round(err.limit / (1024 * 1024)))
+      : 50;
+
     return res.status(413).json({
       success: false,
       error: 'File too large',
-      details: 'Maximum file size is 100MB',
+      details: `Maximum file size is ${sizeLimitMb}MB`,
     });
   }
 

@@ -5,7 +5,6 @@ import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { logger } from '../../utils/logger.js';
-import { resolveConcurrency } from '../../utils/concurrency.js';
 
 const PYTHON_PROBE_TIMEOUT_MS = Number.parseInt(
   process.env.REMOVE_BG_PYTHON_PROBE_TIMEOUT_MS || '10000',
@@ -24,10 +23,13 @@ const DEPENDENCY_INSTALL_TIMEOUT_MS = Number.parseInt(
   process.env.REMOVE_BG_INSTALL_TIMEOUT_MS || '900000',
   10
 );
+const MAX_WORKER_COUNT = 4;
+const DEFAULT_WORKER_COUNT = 1;
 const PROCESS_OUTPUT_CAPTURE_LIMIT = 64 * 1024;
 
 const DEPENDENCY_INSTALL_COMMAND = 'python -m pip install rembg pillow onnxruntime';
 const DEPENDENCY_INSTALL_ARGS = ['-m', 'pip', 'install', 'rembg', 'pillow', 'onnxruntime'];
+const DEPENDENCY_INSTALL_COMMAND_FALLBACK = 'pip install rembg pillow onnxruntime';
 
 const isAutoInstallRemoveBgEnabled = () => ['1', 'true', 'yes', 'on'].includes(
   String(process.env.REMOVE_BG_AUTO_INSTALL || 'true').toLowerCase()
@@ -43,6 +45,48 @@ const appendProcessOutput = (current, chunk) => {
     return nextValue;
   }
   return nextValue.slice(-PROCESS_OUTPUT_CAPTURE_LIMIT);
+};
+
+const parsePositiveInteger = (value) => {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return null;
+  }
+
+  return parsed;
+};
+
+const resolveWorkerCount = (workerCount) => {
+  const explicitValue = parsePositiveInteger(workerCount);
+  if (explicitValue) {
+    return explicitValue;
+  }
+
+  const configuredValue = parsePositiveInteger(process.env.REMOVE_BG_WORKERS);
+  if (configuredValue) {
+    return Math.min(MAX_WORKER_COUNT, configuredValue);
+  }
+
+  return DEFAULT_WORKER_COUNT;
+};
+
+const appendExitTroubleshootingHint = (reason) => {
+  const normalizedReason = String(reason || '').trim();
+  if (!normalizedReason) {
+    return (
+      `rembg worker exited unexpectedly. Try setting REMOVE_BG_WORKERS=1 and install dependencies with: ` +
+      DEPENDENCY_INSTALL_COMMAND_FALLBACK
+    );
+  }
+
+  if (!normalizedReason.includes('rembg worker exited with code')) {
+    return normalizedReason;
+  }
+
+  return (
+    `${normalizedReason}. Try setting REMOVE_BG_WORKERS=1 and install dependencies with: ` +
+    DEPENDENCY_INSTALL_COMMAND_FALLBACK
+  );
 };
 
 const runProcess = (command, args, { timeoutMs } = {}) =>
@@ -183,6 +227,7 @@ class RembgWorker {
     this.proc = null;
     this.stdoutReader = null;
     this.stderr = '';
+    this.stdoutDiagnostics = '';
     this.ready = false;
     this.readyPromise = null;
     this.readyResolver = null;
@@ -195,6 +240,7 @@ class RembgWorker {
 
     this.ready = false;
     this.stderr = '';
+    this.stdoutDiagnostics = '';
     this.readyPromise = new Promise((resolve, reject) => {
       this.readyResolver = resolve;
       this.readyRejecter = reject;
@@ -219,7 +265,10 @@ class RembgWorker {
     });
 
     this.stdoutReader.on('line', (line) => {
-      this.handleWorkerMessage(line);
+      const handled = this.handleWorkerMessage(line);
+      if (!handled && String(line || '').trim()) {
+        this.stdoutDiagnostics = appendProcessOutput(this.stdoutDiagnostics, `${line}\n`);
+      }
     });
 
     this.proc.stderr.on('data', (chunk) => {
@@ -232,8 +281,11 @@ class RembgWorker {
     });
 
     this.proc.on('exit', (code, signal) => {
-      const reason =
-        this.stderr.trim() || `rembg worker exited with code ${code}${signal ? ` (${signal})` : ''}`;
+      const baseReason =
+        this.stderr.trim() ||
+        this.stdoutDiagnostics.trim() ||
+        `rembg worker exited with code ${code}${signal ? ` (${signal})` : ''}`;
+      const reason = appendExitTroubleshootingHint(baseReason);
       this.rejectReady(new Error(reason));
       this.rejectCurrentTask(new Error(reason));
       this.ready = false;
@@ -257,7 +309,7 @@ class RembgWorker {
     try {
       payload = JSON.parse(rawLine);
     } catch {
-      return;
+      return false;
     }
 
     if (payload?.type === 'ready') {
@@ -268,20 +320,20 @@ class RembgWorker {
         this.readyRejecter = null;
       }
       logger.info(`remove-background worker ready: #${this.id} (model=${payload.model || 'default'})`);
-      return;
+      return true;
     }
 
     if (payload?.type === 'init_error') {
       this.rejectReady(new Error(payload.error || 'Failed to initialize rembg worker'));
-      return;
+      return true;
     }
 
     if (!this.currentTask) {
-      return;
+      return true;
     }
 
     if (payload?.id !== this.currentTask.id) {
-      return;
+      return true;
     }
 
     const task = this.currentTask;
@@ -290,10 +342,11 @@ class RembgWorker {
 
     if (payload.ok) {
       task.resolve();
-      return;
+      return true;
     }
 
     task.reject(new Error(payload.error || 'rembg worker failed to process the image'));
+    return true;
   }
 
   rejectReady(error) {
@@ -382,15 +435,7 @@ class RembgWorker {
 
 export class RembgWorkerPool {
   constructor({ workerCount, taskTimeoutMs } = {}) {
-    this.workerCount = Math.max(
-      1,
-      workerCount ||
-        resolveConcurrency('REMOVE_BG_WORKERS', {
-          reserve: 1,
-          min: 1,
-          max: 4,
-        })
-    );
+    this.workerCount = resolveWorkerCount(workerCount);
     this.taskTimeoutMs = taskTimeoutMs || TASK_TIMEOUT_MS;
     this.initialized = false;
     this.initializingPromise = null;
@@ -438,7 +483,18 @@ export class RembgWorkerPool {
         busy: false,
       }));
 
-      await Promise.all(this.workers.map((worker) => worker.runner.start()));
+      try {
+        for (const worker of this.workers) {
+          await worker.runner.start();
+        }
+      } catch (error) {
+        await Promise.all(this.workers.map((worker) => worker.runner.stop().catch(() => undefined)));
+        const details = String(error?.message || '').trim();
+        throw new Error(
+          `Failed to initialize remove-background workers: ${details || 'worker startup failed'}`
+        );
+      }
+
       this.initialized = true;
 
       logger.info(`remove-background worker pool initialized (workers=${this.workerCount})`);

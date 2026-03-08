@@ -25,6 +25,11 @@ const createFileId = () => Math.random().toString(36).slice(2, 11);
 const isPdfFile = (file: File) =>
   file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
+const ensurePdfExtension = (fileName: string) =>
+  fileName.toLowerCase().endsWith('.pdf')
+    ? fileName
+    : `${fileName.replace(/\.[^.]+$/, '')}.pdf`;
+
 export default function RepairPDF() {
   const [fileItem, setFileItem] = useState<RepairFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -143,7 +148,7 @@ export default function RepairPDF() {
               ...prev,
               status: 'completed',
               downloadUrl: downloadInfo.downloadUrl,
-              outputName: downloadInfo.fileName || 'repaired.pdf',
+              outputName: downloadInfo.fileName || ensurePdfExtension(prev.name),
               error: undefined,
             }
           : prev
@@ -173,7 +178,10 @@ export default function RepairPDF() {
     }
 
     if (fileItem.downloadUrl) {
-      startFileDownload(fileItem.downloadUrl, fileItem.outputName || 'repaired.pdf');
+      startFileDownload(
+        fileItem.downloadUrl,
+        fileItem.outputName || ensurePdfExtension(fileItem.name)
+      );
       return;
     }
 

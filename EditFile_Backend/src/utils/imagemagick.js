@@ -378,7 +378,7 @@ export const removePathSafe = async (targetPath) => removeManagedPathSafe(target
 export const uploadProcessedFiles = async ({
   jobId,
   files,
-  fallbackBaseName = 'processed-image',
+  fallbackBaseName = 'file_output',
   outputPrefix = 'outputs',
 }) => {
   if (!Array.isArray(files) || files.length === 0) {
@@ -400,7 +400,7 @@ export const uploadProcessedFiles = async ({
         data: file.buffer,
       }))
     );
-    outputFileName = `${sanitizeBaseName(fallbackBaseName, 'processed-images')}.zip`;
+    outputFileName = `${sanitizeBaseName(fallbackBaseName, 'files_output')}.zip`;
     outputContentType = 'application/zip';
   }
 

@@ -5,6 +5,7 @@ import { updateJobStatus, completeJob, failJob } from '../../services/database.s
 import { logger } from '../../utils/logger.js';
 import { ensurePdftkDependency, runCliCommand } from '../../utils/pdf-cli.js';
 import { createTempWorkspace, removePathSafe } from '../../utils/workspace.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const UNLOCK_TIMEOUT_MS = Number.parseInt(
   process.env.UNLOCK_PDF_TIMEOUT_MS || '600000',
@@ -12,7 +13,7 @@ const UNLOCK_TIMEOUT_MS = Number.parseInt(
 );
 
 export const processUnlockPdf = async (jobData) => {
-  const { jobId, fileUrl, password } = jobData;
+  const { jobId, fileUrl, password, originalName = 'document.pdf' } = jobData;
   let tempDir = null;
 
   logger.info(`Starting PDF unlock: ${jobId}`);
@@ -47,8 +48,12 @@ export const processUnlockPdf = async (jobData) => {
       throw new Error('Unlocked PDF generation failed.');
     }
 
-    const outputFileName = 'unlocked.pdf';
-    const outputKey = generateS3Key(jobId, 'unlocked.pdf', 'output');
+    const outputFileName = buildFileName({
+      originalName,
+      extension: 'pdf',
+      fallbackBase: 'document',
+    });
+    const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(unlockedBuffer, outputKey, 'application/pdf');
 
     await completeJob(jobId, outputUrl, unlockedBuffer.length);

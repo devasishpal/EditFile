@@ -2,6 +2,8 @@ import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
 import { convertWithLibreOffice } from '../../utils/libreoffice.js';
+import { CONVERSION_FAILURE_MESSAGE } from '../../utils/office-formats.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 export const processWordToPdf = async (jobData) => {
   const { jobId, fileUrl, originalName = 'document.docx' } = jobData;
@@ -18,7 +20,11 @@ export const processWordToPdf = async (jobData) => {
       throw new Error('Word to PDF conversion produced an empty file.');
     }
 
-    const outputFileName = 'converted.pdf';
+    const outputFileName = buildFileName({
+      originalName,
+      extension: 'pdf',
+      fallbackBase: 'document',
+    });
     const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(pdfBuffer, outputKey, 'application/pdf');
     
@@ -40,8 +46,8 @@ export const processWordToPdf = async (jobData) => {
     
   } catch (error) {
     logger.error(`Word to PDF failed for job ${jobId}:`, error);
-    await failJob(jobId, error.message);
-    throw error;
+    await failJob(jobId, CONVERSION_FAILURE_MESSAGE);
+    throw new Error(CONVERSION_FAILURE_MESSAGE);
   }
 };
 

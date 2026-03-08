@@ -8,6 +8,10 @@ import { processMergePdf } from '../modules/merge-pdf/service.js';
 import { processSplitPdf } from '../modules/split-pdf/service.js';
 import { processPdfToWord } from '../modules/pdf-to-word/service.js';
 import { processWordToPdf } from '../modules/word-to-pdf/service.js';
+import { processExcelToPdf } from '../modules/excel-to-pdf/service.js';
+import { processPdfToExcel } from '../modules/pdf-to-excel/service.js';
+import { processPowerpointToPdf } from '../modules/powerpoint-to-pdf/service.js';
+import { processPdfToPowerpoint } from '../modules/pdf-to-powerpoint/service.js';
 import { processPdfToJpg } from '../modules/pdf-to-jpg/service.js';
 import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
@@ -52,6 +56,10 @@ const localProcessors = {
   splitPdf: processSplitPdf,
   pdfToWord: processPdfToWord,
   wordToPdf: processWordToPdf,
+  excelToPdf: processExcelToPdf,
+  pdfToExcel: processPdfToExcel,
+  powerpointToPdf: processPowerpointToPdf,
+  pdfToPowerpoint: processPdfToPowerpoint,
   pdfToJpg: processPdfToJpg,
   jpgToPdf: processJpgToPdf,
   protectPdf: processProtectPdf,
@@ -123,6 +131,10 @@ export const queues = {
   splitPdf: createQueue('split-pdf'),
   pdfToWord: createQueue('pdf-to-word'),
   wordToPdf: createQueue('word-to-pdf'),
+  excelToPdf: createQueue('excel-to-pdf'),
+  pdfToExcel: createQueue('pdf-to-excel'),
+  powerpointToPdf: createQueue('powerpoint-to-pdf'),
+  pdfToPowerpoint: createQueue('pdf-to-powerpoint'),
   pdfToJpg: createQueue('pdf-to-jpg'),
   jpgToPdf: createQueue('jpg-to-pdf'),
   protectPdf: createQueue('protect-pdf'),

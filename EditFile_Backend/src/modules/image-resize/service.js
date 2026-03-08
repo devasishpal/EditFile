@@ -174,7 +174,7 @@ const resizeBufferWithSharp = async ({
   ]);
 
   return {
-    fileName: `${getBaseName(originalName, 'image')}-resized.${extension}`,
+    fileName: `${getBaseName(originalName, 'image')}.${extension}`,
     contentType: getMimeTypeForFormat(outputFormat),
     buffer: resizedBuffer,
     size: resizedBuffer.length,
@@ -215,7 +215,7 @@ const resizeBufferWithMagick = async ({
     ]);
 
     return {
-      fileName: `${getBaseName(originalName, 'image')}-resized.${extension}`,
+      fileName: `${getBaseName(originalName, 'image')}.${extension}`,
       contentType: getMimeTypeForFormat(format),
       buffer: resizedBuffer,
       size: resizedBuffer.length,
@@ -336,7 +336,7 @@ export const processImageResize = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-resized`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

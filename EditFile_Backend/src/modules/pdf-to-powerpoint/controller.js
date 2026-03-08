@@ -1,0 +1,71 @@
+import { v4 as uuidv4 } from 'uuid';
+import { createJob } from '../../services/database.service.js';
+import { uploadFile, generateS3Key } from '../../config/s3.js';
+import { addJob } from '../../queue/queue.js';
+import { logger } from '../../utils/logger.js';
+import { asyncHandler } from '../../middleware/error.middleware.js';
+
+const ALLOWED_OUTPUT_FORMATS = new Set(['pptx', 'ppt']);
+
+export const pdfToPowerpoint = asyncHandler(async (req, res) => {
+  const startTime = Date.now();
+
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      error: 'No file uploaded',
+    });
+  }
+
+  const outputFormat = String(req.body.format || 'pptx').toLowerCase();
+  if (!ALLOWED_OUTPUT_FORMATS.has(outputFormat)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid output format. Use pptx or ppt.',
+    });
+  }
+
+  const file = req.file;
+  const requestId = uuidv4();
+
+  logger.info(`PDF to PowerPoint request: ${requestId}`);
+
+  try {
+    const s3Key = generateS3Key(requestId, file.originalname, 'input');
+    const fileUrl = await uploadFile(file.buffer, s3Key, file.mimetype);
+
+    const job = await createJob({
+      toolType: 'pdf-to-powerpoint',
+      originalFileUrl: fileUrl,
+      originalSize: file.size,
+      metadata: {
+        outputFormat,
+        originalName: file.originalname,
+      },
+      ipAddress: req.ip,
+    });
+
+    await addJob('pdfToPowerpoint', {
+      jobId: job.id,
+      fileUrl,
+      outputFormat,
+      originalName: file.originalname,
+    });
+
+    const duration = Date.now() - startTime;
+    logger.info(`PDF to PowerPoint job created: ${job.id} in ${duration}ms`);
+
+    res.status(202).json({
+      success: true,
+      message: 'PDF to PowerPoint conversion job queued successfully',
+      jobId: job.id,
+      status: 'pending',
+      outputFormat,
+    });
+  } catch (error) {
+    logger.error(`PDF to PowerPoint failed for request ${requestId}:`, error);
+    throw error;
+  }
+});
+
+export default { pdfToPowerpoint };

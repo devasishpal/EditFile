@@ -47,6 +47,7 @@ export const pdfToWord = asyncHandler(async (req, res) => {
       jobId: job.id,
       fileUrl,
       outputFormat,
+      originalName: file.originalname,
     });
 
     const duration = Date.now() - startTime;

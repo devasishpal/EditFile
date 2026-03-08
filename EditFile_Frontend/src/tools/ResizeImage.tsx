@@ -38,6 +38,7 @@ interface ResizedImage {
   newHeight: number;
   status: 'ready' | 'processing' | 'completed' | 'error';
   downloadUrl: string | null;
+  outputName: string | null;
   result: ProcessedAsset | null;
   error?: string;
 }
@@ -101,15 +102,6 @@ const getTargetDimensions = ({
   };
 };
 
-const buildResizedFileName = (fileName: string) => {
-  const lastDot = fileName.lastIndexOf('.');
-  if (lastDot <= 0) {
-    return `${fileName}-resized`;
-  }
-
-  return `${fileName.slice(0, lastDot)}-resized${fileName.slice(lastDot)}`;
-};
-
 export default function ResizeImage() {
   const [files, setFiles] = useState<ResizedImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -166,6 +158,7 @@ export default function ResizeImage() {
               newHeight: nextDimensions.height,
               status: 'ready',
               downloadUrl: null,
+              outputName: null,
               result: null,
             };
             setFiles((prev) => [...prev, newImage]);
@@ -242,6 +235,7 @@ export default function ResizeImage() {
           newHeight: nextDimensions.height,
           status: shouldReset ? 'ready' : file.status,
           downloadUrl: shouldReset ? null : file.downloadUrl,
+          outputName: shouldReset ? null : file.outputName,
           result: shouldReset ? null : file.result,
           error: shouldReset ? undefined : file.error,
         };
@@ -329,6 +323,7 @@ export default function ResizeImage() {
             status: 'processing',
             error: undefined,
             downloadUrl: null,
+            outputName: null,
             result: null,
             newWidth: targetDimensions.width,
             newHeight: targetDimensions.height,
@@ -339,6 +334,7 @@ export default function ResizeImage() {
       try {
         let localResult: ProcessedAsset | null = null;
         let downloadUrl: string | null = null;
+        let outputName: string | null = null;
 
         if (isLocalApiTarget) {
           try {
@@ -370,6 +366,7 @@ export default function ResizeImage() {
           await pollJobUntilDone(queueResult.jobId);
           const downloadInfo = await getJobDownloadInfo(queueResult.jobId);
           downloadUrl = downloadInfo.downloadUrl;
+          outputName = downloadInfo.fileName || file.name;
         }
 
         setFiles((prev) =>
@@ -379,6 +376,7 @@ export default function ResizeImage() {
                   ...item,
                   status: 'completed',
                   downloadUrl,
+                  outputName,
                   result: localResult,
                   error: undefined,
                   newWidth: targetDimensions.width,
@@ -397,6 +395,7 @@ export default function ResizeImage() {
                   ...item,
                   status: 'error',
                   downloadUrl: null,
+                  outputName: null,
                   result: null,
                   error: message,
                 }
@@ -420,7 +419,7 @@ export default function ResizeImage() {
       return;
     }
 
-    startFileDownload(file.downloadUrl, buildResizedFileName(file.name));
+    startFileDownload(file.downloadUrl, file.outputName || file.name);
   };
 
   const handleDownloadAll = () => {
@@ -432,7 +431,7 @@ export default function ResizeImage() {
       if (file.result) {
         downloadProcessedAsset(file.result);
       } else if (file.downloadUrl) {
-        startFileDownload(file.downloadUrl, buildResizedFileName(file.name));
+        startFileDownload(file.downloadUrl, file.outputName || file.name);
       }
     });
   };

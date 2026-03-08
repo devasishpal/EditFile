@@ -100,6 +100,13 @@ const ensureLocalDirectory = async (absolutePath) => {
 const getPublicBaseUrl = () =>
   process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`;
 
+const sanitizeHeaderFileName = (fileName = 'download') => {
+  const sanitized = String(fileName || '')
+    .replace(/["\\\r\n]/g, '_')
+    .trim();
+  return sanitized || 'download';
+};
+
 export const uploadFile = async (buffer, key, contentType) => {
   try {
     if (isLocalStorageMode) {
@@ -189,17 +196,31 @@ export const readLocalFileByKey = async (keyOrUrl) => {
   };
 };
 
-export const getSignedDownloadUrl = async (keyOrUrl, expiresIn = EXPIRES_IN) => {
+export const getSignedDownloadUrl = async (keyOrUrl, expiresIn = EXPIRES_IN, fileName = null) => {
   try {
     const cleanKey = normalizeStorageKey(keyOrUrl);
+    const safeFileName = fileName ? sanitizeHeaderFileName(fileName) : null;
 
     if (isLocalStorageMode) {
-      return `${getPublicBaseUrl()}/api/local-download?key=${encodeURIComponent(cleanKey)}`;
+      const params = new URLSearchParams({
+        key: cleanKey,
+      });
+
+      if (safeFileName) {
+        params.set('filename', safeFileName);
+      }
+
+      return `${getPublicBaseUrl()}/api/local-download?${params.toString()}`;
     }
 
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,
       Key: cleanKey,
+      ...(safeFileName
+        ? {
+            ResponseContentDisposition: `attachment; filename="${safeFileName}"`,
+          }
+        : {}),
     });
 
     return await getSignedUrl(s3Client, command, { expiresIn });

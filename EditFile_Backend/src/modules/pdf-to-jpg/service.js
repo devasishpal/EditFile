@@ -135,7 +135,7 @@ export const processPdfToJpg = async (jobData) => {
       const outputName =
         generatedImageNames.length === 1
           ? `${safeBaseName}.jpg`
-          : `${safeBaseName}-page-${String(index + 1).padStart(pageLabelWidth, '0')}.jpg`;
+          : `${safeBaseName}_${String(index + 1).padStart(pageLabelWidth, '0')}.jpg`;
 
       processedFiles.push({
         fileName: outputName,
@@ -147,7 +147,7 @@ export const processPdfToJpg = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${safeBaseName}-pages`,
+      fallbackBaseName: `${safeBaseName}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

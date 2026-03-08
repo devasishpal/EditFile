@@ -11,6 +11,7 @@ import {
   ensureGhostscriptDependency,
   runCliCommand,
 } from '../../utils/pdf-cli.js';
+import { buildOutputZipName } from '../../utils/file-name.js';
 
 const SPLIT_TIMEOUT_MS = Number.parseInt(process.env.SPLIT_PDF_TIMEOUT_MS || '600000', 10);
 const YIELD_EVERY_OUTPUTS = 10;
@@ -312,9 +313,9 @@ export const processSplitPdf = async (jobData) => {
         const segment = extractSelection.segments[i];
         const rangeLabel =
           segment.startPage === segment.endPage
-            ? `page-${segment.startPage}`
-            : `pages-${segment.startPage}-${segment.endPage}`;
-        const outputFileName = `${baseName}-${rangeLabel}.pdf`;
+            ? String(segment.startPage).padStart(4, '0')
+            : `${String(segment.startPage).padStart(4, '0')}-${String(segment.endPage).padStart(4, '0')}`;
+        const outputFileName = `${baseName}_${rangeLabel}.pdf`;
         const outputPath = path.join(tempDir, `extract-${String(i + 1).padStart(4, '0')}.pdf`);
 
         await runGhostscriptExtract(
@@ -350,8 +351,8 @@ export const processSplitPdf = async (jobData) => {
 
         const outputFileName =
           group.pages.length === 1
-            ? `${baseName}-page-${startPage}.pdf`
-            : `${baseName}-pages-${startPage}-${endPage}.pdf`;
+            ? `${baseName}_${String(startPage).padStart(4, '0')}.pdf`
+            : `${baseName}_${String(startPage).padStart(4, '0')}-${String(endPage).padStart(4, '0')}.pdf`;
         const outputPath = path.join(tempDir, outputFileName);
 
         await runPdftkExtract(pdftkPath, inputPath, group.pageSpec, outputPath);
@@ -379,8 +380,8 @@ export const processSplitPdf = async (jobData) => {
 
         const outputFileName =
           group.pages.length === 1
-            ? `${baseName}-page-${startPage}.pdf`
-            : `${baseName}-pages-${startPage}-${endPage}.pdf`;
+            ? `${baseName}_${String(startPage).padStart(4, '0')}.pdf`
+            : `${baseName}_${String(startPage).padStart(4, '0')}-${String(endPage).padStart(4, '0')}.pdf`;
         const outputPath = path.join(tempDir, outputFileName);
 
         await runPdftkExtract(pdftkPath, inputPath, group.pageSpec, outputPath);
@@ -411,7 +412,7 @@ export const processSplitPdf = async (jobData) => {
         data: item.buffer,
       }))
     );
-    const outputFileName = `${baseName}-split.zip`;
+    const outputFileName = buildOutputZipName(originalName, 'document');
     const outputContentType = 'application/zip';
 
     const outputKey = generateS3Key(jobId, outputFileName, 'outputs');

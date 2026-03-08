@@ -76,8 +76,10 @@ export const downloadFile = asyncHandler(async (req, res) => {
     });
   }
   
+  const downloadFileName = job.metadata?.outputFileName || job.metadata?.originalName || 'download';
+
   // Generate signed URL (valid for 1 hour)
-  const downloadUrl = await getSignedDownloadUrl(job.output_file_url, 3600);
+  const downloadUrl = await getSignedDownloadUrl(job.output_file_url, 3600, downloadFileName);
   
   // Calculate reduction percentage
   const reductionPercent = ((job.original_size - job.output_size) / job.original_size * 100).toFixed(2);
@@ -86,7 +88,7 @@ export const downloadFile = asyncHandler(async (req, res) => {
     success: true,
     downloadUrl,
     expiresIn: 3600,
-    fileName: job.metadata?.outputFileName || job.metadata?.originalName || 'download',
+    fileName: downloadFileName,
     originalSize: job.original_size,
     outputSize: job.output_size,
     reductionPercent,

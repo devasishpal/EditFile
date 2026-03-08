@@ -22,7 +22,7 @@ const cropBuffer = async ({ imageBuffer, originalName, mimeType, x, y, width, he
   });
 
   return {
-    fileName: `${getBaseName(originalName, 'image')}-cropped.${extension}`,
+    fileName: `${getBaseName(originalName, 'image')}.${extension}`,
     contentType: getMimeTypeForFormat(format),
     buffer: outputBuffer,
     size: outputBuffer.length,
@@ -86,7 +86,7 @@ export const processImageCrop = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-cropped`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

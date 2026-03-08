@@ -34,6 +34,15 @@ const isPdfFile = (file: File) =>
 const createPagePreview = (index: number) =>
   `https://placehold.co/150x200/violet/white?text=Page+${index + 1}`;
 
+const getOrganizedOutputName = (file: File | null) => {
+  if (!file) {
+    return 'organized_output.pdf';
+  }
+
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return `${baseName}_output.pdf`;
+};
+
 export default function OrganizePDF() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [pages, setPages] = useState<Page[]>([]);
@@ -45,13 +54,14 @@ export default function OrganizePDF() {
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [downloadFileName, setDownloadFileName] = useState('organized.pdf');
+  const [downloadFileName, setDownloadFileName] = useState(getOrganizedOutputName(null));
 
   const loadPdfForOrganizing = useCallback(async (file: File) => {
     setIsInspecting(true);
     setRequestError(null);
     setRequestSuccess(null);
     setDownloadUrl(null);
+    setDownloadFileName(getOrganizedOutputName(file));
     setUploadProgress(0);
 
     try {
@@ -234,7 +244,7 @@ export default function OrganizePDF() {
 
       const downloadInfo = await getJobDownloadInfo(queueResult.jobId);
       setDownloadUrl(downloadInfo.downloadUrl);
-      setDownloadFileName(downloadInfo.fileName || 'organized.pdf');
+      setDownloadFileName(downloadInfo.fileName || getOrganizedOutputName(sourceFile));
       setRequestSuccess('PDF organized successfully.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to organize PDF.';

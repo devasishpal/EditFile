@@ -6,6 +6,7 @@ import { updateJobStatus, completeJob, failJob } from '../../services/database.s
 import { logger } from '../../utils/logger.js';
 import { ensurePdftkDependency, runCliCommand } from '../../utils/pdf-cli.js';
 import { createTempWorkspace, removePathSafe } from '../../utils/workspace.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const PROTECT_TIMEOUT_MS = Number.parseInt(
   process.env.PROTECT_PDF_TIMEOUT_MS || '600000',
@@ -31,7 +32,13 @@ const toPdftkAllowFlags = (permissions = {}) => {
 };
 
 export const processProtectPdf = async (jobData) => {
-  const { jobId, fileUrl, password, permissions } = jobData;
+  const {
+    jobId,
+    fileUrl,
+    password,
+    permissions,
+    originalName = 'document.pdf',
+  } = jobData;
   let tempDir = null;
 
   logger.info(`Starting PDF protection: ${jobId}`);
@@ -78,8 +85,12 @@ export const processProtectPdf = async (jobData) => {
       throw new Error('Protected PDF generation failed.');
     }
 
-    const outputFileName = 'protected.pdf';
-    const outputKey = generateS3Key(jobId, 'protected.pdf', 'output');
+    const outputFileName = buildFileName({
+      originalName,
+      extension: 'pdf',
+      fallbackBase: 'document',
+    });
+    const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(protectedBuffer, outputKey, 'application/pdf');
 
     await completeJob(jobId, outputUrl, protectedBuffer.length);

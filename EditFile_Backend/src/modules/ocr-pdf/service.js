@@ -838,7 +838,7 @@ export const processOcrPdf = async (jobData) => {
     }
 
     const formatConfig = getOutputFormatConfig(outputFormat);
-    const safeOutputName = outputFileName || `${getFileBaseName(originalName)}-ocr.${formatConfig.extension}`;
+    const safeOutputName = outputFileName || `${getFileBaseName(originalName)}.${formatConfig.extension}`;
 
     await updateJobStatus(
       jobId,

@@ -94,7 +94,7 @@ export const processImageConvert = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-converted`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

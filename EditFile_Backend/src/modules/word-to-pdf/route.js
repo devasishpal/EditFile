@@ -1,14 +1,19 @@
 import express from 'express';
 import multer from 'multer';
 import { wordToPdf } from './controller.js';
-import { validateFileType, ALLOWED_DOC_TYPES } from '../../middleware/validation.middleware.js';
+import {
+  validateFileType,
+  ALLOWED_DOC_TYPES,
+  ALLOWED_DOC_EXTENSIONS,
+} from '../../middleware/validation.middleware.js';
 
 const router = express.Router();
+const MAX_UPLOAD_SIZE_BYTES = 50 * 1024 * 1024;
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 100 * 1024 * 1024,
+    fileSize: MAX_UPLOAD_SIZE_BYTES,
   },
 });
 
@@ -19,7 +24,7 @@ const upload = multer({
 router.post(
   '/',
   upload.single('file'),
-  validateFileType(ALLOWED_DOC_TYPES),
+  validateFileType(ALLOWED_DOC_TYPES, ALLOWED_DOC_EXTENSIONS),
   wordToPdf
 );
 

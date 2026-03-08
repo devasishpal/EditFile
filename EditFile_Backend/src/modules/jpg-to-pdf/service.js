@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const getPageSize = (size, orientation) => {
   const sizes = {
@@ -89,11 +90,23 @@ export const processJpgToPdf = async (jobData) => {
     const pdfBuffer = Buffer.from(pdfBytes);
     
     // Upload
-    const outputKey = generateS3Key(jobId, 'converted.pdf', 'output');
+    const outputFileName = buildFileName({
+      originalName: fileUrls[0]?.name || 'images',
+      extension: 'pdf',
+      fallbackBase: 'images',
+      useOutputSuffix: fileUrls.length > 1,
+    });
+    const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(pdfBuffer, outputKey, 'application/pdf');
     
     // Complete job
     await completeJob(jobId, outputUrl, pdfBuffer.length);
+    await updateJobStatus(jobId, 'completed', {
+      metadata: {
+        outputFileName,
+        fileCount: fileUrls.length,
+      },
+    });
     
     logger.info(`JPG to PDF completed: ${jobId}, pages: ${fileUrls.length}`);
     

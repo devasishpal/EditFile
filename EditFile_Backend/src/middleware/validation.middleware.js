@@ -217,6 +217,15 @@ const getRequestFiles = (req) => {
   return [];
 };
 
+const normalizeExtension = (fileName = '') => {
+  const match = String(fileName || '')
+    .trim()
+    .toLowerCase()
+    .match(/\.([a-z0-9]+)$/);
+
+  return match ? match[1] : '';
+};
+
 /**
  * Validation rules for PDF password
  */
@@ -283,7 +292,16 @@ export const validateOcrLanguage = [
 /**
  * File type validation helper
  */
-export const validateFileType = (allowedTypes) => {
+export const validateFileType = (allowedTypes, allowedExtensions = []) => {
+  const normalizedAllowedTypes = new Set(
+    (allowedTypes || []).map((type) => String(type || '').toLowerCase()).filter(Boolean)
+  );
+  const normalizedAllowedExtensions = new Set(
+    (allowedExtensions || [])
+      .map((extension) => String(extension || '').toLowerCase().replace(/^\./, ''))
+      .filter(Boolean)
+  );
+
   return (req, res, next) => {
     const files = getRequestFiles(req);
     if (files.length === 0) {
@@ -294,11 +312,30 @@ export const validateFileType = (allowedTypes) => {
     }
     
     for (const file of files) {
-      if (!allowedTypes.includes(file.mimetype)) {
+      const mimeType = String(file.mimetype || '').toLowerCase();
+      const extension = normalizeExtension(file.originalname);
+      const mimeAllowed =
+        normalizedAllowedTypes.size > 0 && normalizedAllowedTypes.has(mimeType);
+      const extensionAllowed =
+        normalizedAllowedExtensions.size > 0 && normalizedAllowedExtensions.has(extension);
+
+      if (!mimeAllowed && !extensionAllowed) {
+        const detailsParts = [];
+        if (normalizedAllowedTypes.size > 0) {
+          detailsParts.push(`Allowed MIME types: ${[...normalizedAllowedTypes].join(', ')}`);
+        }
+        if (normalizedAllowedExtensions.size > 0) {
+          detailsParts.push(
+            `Allowed file extensions: ${[...normalizedAllowedExtensions]
+              .map((value) => `.${value}`)
+              .join(', ')}`
+          );
+        }
+
         return res.status(400).json({
           success: false,
           error: 'Invalid file type',
-          details: `Allowed types: ${allowedTypes.join(', ')}`,
+          details: detailsParts.join(' | ') || 'Unsupported file type',
         });
       }
     }
@@ -331,6 +368,7 @@ export const validateFileSize = (maxSizeMB) => {
 
 // Allowed MIME types
 export const ALLOWED_PDF_TYPES = ['application/pdf'];
+export const ALLOWED_PDF_EXTENSIONS = ['pdf'];
 export const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -346,4 +384,21 @@ export const ALLOWED_DOC_TYPES = [
   'application/vnd.oasis.opendocument.text',
   'text/plain',
   'application/rtf',
+  'text/rtf',
 ];
+export const ALLOWED_DOC_EXTENSIONS = ['doc', 'docx', 'odt', 'rtf', 'txt'];
+export const ALLOWED_EXCEL_TYPES = [
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel.sheet.macroenabled.12',
+  'application/vnd.oasis.opendocument.spreadsheet',
+];
+export const ALLOWED_EXCEL_EXTENSIONS = ['xls', 'xlsx'];
+export const ALLOWED_POWERPOINT_TYPES = [
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+  'application/vnd.ms-powerpoint.presentation.macroenabled.12',
+  'application/vnd.oasis.opendocument.presentation',
+];
+export const ALLOWED_POWERPOINT_EXTENSIONS = ['ppt', 'pptx'];

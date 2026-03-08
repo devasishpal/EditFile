@@ -9,6 +9,8 @@ interface QueuedJobResponse {
 
 export type SplitMethod = 'range' | 'every' | 'extract';
 export type PdfToWordOutputFormat = 'docx' | 'doc' | 'rtf';
+export type PdfToExcelOutputFormat = 'xlsx' | 'xls';
+export type PdfToPowerPointOutputFormat = 'pptx' | 'ppt';
 export type OcrOutputFormat = 'searchable-pdf' | 'text' | 'word';
 export type UploadProgressHandler = (progress: number) => void;
 export type OrganizePdfRotation = 0 | 90 | 180 | 270;
@@ -165,6 +167,94 @@ export const queueWordToPdf = async (
   }
 
   return requestJson<QueuedJobResponse>('/api/word-to-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueExcelToPdf = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/excel-to-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/excel-to-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queuePowerPointToPdf = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/powerpoint-to-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/powerpoint-to-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queuePdfToExcel = async (
+  file: File,
+  outputFormat: PdfToExcelOutputFormat = 'xlsx',
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('format', outputFormat);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/pdf-to-excel',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/pdf-to-excel', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queuePdfToPowerPoint = async (
+  file: File,
+  outputFormat: PdfToPowerPointOutputFormat = 'pptx',
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('format', outputFormat);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/pdf-to-powerpoint',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/pdf-to-powerpoint', {
     method: 'POST',
     body: formData,
   });

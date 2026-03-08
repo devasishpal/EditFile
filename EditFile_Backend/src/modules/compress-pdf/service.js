@@ -6,6 +6,7 @@ import { updateJobStatus, completeJob, failJob } from '../../services/database.s
 import { logger } from '../../utils/logger.js';
 import { createTempWorkspace as createManagedTempWorkspace, removePathSafe } from '../../utils/workspace.js';
 import { resolveConcurrency } from '../../utils/concurrency.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const GHOSTSCRIPT_BINARIES = ['gswin64c.exe', 'gswin32c.exe', 'gswin64c', 'gswin32c', 'gs'];
 const GHOSTSCRIPT_TIMEOUT_MS = Number.parseInt(process.env.GHOSTSCRIPT_TIMEOUT_MS || '600000', 10);
@@ -479,7 +480,12 @@ export const processCompressPdf = async (jobData) => {
     const compressedSize = compressedBuffer.length;
     
     // Upload compressed file to S3
-    const outputKey = generateS3Key(jobId, `compressed-${originalName}`, 'outputs');
+    const outputFileName = buildFileName({
+      originalName,
+      extension: 'pdf',
+      fallbackBase: 'document',
+    });
+    const outputKey = generateS3Key(jobId, outputFileName, 'outputs');
     const outputUrl = await uploadFile(
       compressedBuffer,
       outputKey,

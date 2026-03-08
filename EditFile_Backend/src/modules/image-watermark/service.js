@@ -129,7 +129,7 @@ const applyWatermarkBuffer = async ({
 
     const outputBuffer = await fs.readFile(outputPath);
     return {
-      fileName: `${getBaseName(originalName, 'image')}-watermarked.${extension}`,
+      fileName: `${getBaseName(originalName, 'image')}.${extension}`,
       contentType: getMimeTypeForFormat(format),
       buffer: outputBuffer,
       size: outputBuffer.length,
@@ -212,7 +212,7 @@ export const processImageWatermark = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-watermarked`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

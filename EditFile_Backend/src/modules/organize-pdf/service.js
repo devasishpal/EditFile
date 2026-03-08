@@ -87,7 +87,7 @@ export const processOrganizePdf = async (jobData) => {
       throw new Error('Organized PDF generation failed.');
     }
 
-    const outputFileName = `${sanitizeBaseName(originalName)}-organized.pdf`;
+    const outputFileName = `${sanitizeBaseName(originalName, 'document')}.pdf`;
     const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(outputBuffer, outputKey, 'application/pdf');
 

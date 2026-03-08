@@ -6,6 +6,7 @@ import { updateJobStatus, completeJob, failJob } from '../../services/database.s
 import { logger } from '../../utils/logger.js';
 import { ensureGhostscriptDependency, runCliCommand } from '../../utils/pdf-cli.js';
 import { createTempWorkspace, removePathSafe } from '../../utils/workspace.js';
+import { buildFileName } from '../../utils/file-name.js';
 
 const REPAIR_TIMEOUT_MS = Number.parseInt(process.env.REPAIR_PDF_TIMEOUT_MS || '600000', 10);
 
@@ -30,7 +31,7 @@ const detectLikelyCorruption = async (buffer) => {
 };
 
 export const processRepairPdf = async (jobData) => {
-  const { jobId, fileUrl } = jobData;
+  const { jobId, fileUrl, originalName = 'document.pdf' } = jobData;
   let tempDir = null;
 
   logger.info(`Starting PDF repair: ${jobId}`);
@@ -75,7 +76,11 @@ export const processRepairPdf = async (jobData) => {
       throw new Error('Unable to create a repaired PDF output.');
     }
 
-    const outputFileName = 'repaired.pdf';
+    const outputFileName = buildFileName({
+      originalName,
+      extension: 'pdf',
+      fallbackBase: 'document',
+    });
     const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(repairedBuffer, outputKey, 'application/pdf');
 

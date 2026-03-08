@@ -117,9 +117,22 @@ const fileExists = async (targetPath) => {
   }
 };
 
+const sanitizeBaseName = (value, fallback = 'image') => {
+  const raw = String(value || fallback).trim();
+  const withoutExtension = raw.replace(/\.[^/.]+$/, '');
+  const sanitized = withoutExtension
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+    .replace(/\s+/g, '-')
+    .replace(/_+/g, '_')
+    .replace(/-+/g, '-')
+    .replace(/^[._-]+|[._-]+$/g, '')
+    .slice(0, 80);
+
+  return sanitized || fallback;
+};
+
 const getOutputName = (originalName) => {
-  const baseName = path.parse(originalName || 'image').name || 'image';
-  return `${baseName}-passport.png`;
+  return `${sanitizeBaseName(originalName, 'image')}.png`;
 };
 
 const resolveFileExtension = (file) => {

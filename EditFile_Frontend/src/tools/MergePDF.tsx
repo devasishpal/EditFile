@@ -31,6 +31,7 @@ interface MergeFile {
 }
 
 const createFileId = () => Math.random().toString(36).slice(2, 11);
+const DEFAULT_MERGED_FILE_NAME = 'merged_output.pdf';
 
 export default function MergePDF() {
   const [files, setFiles] = useState<MergeFile[]>([]);
@@ -39,13 +40,13 @@ export default function MergePDF() {
   const [mergeError, setMergeError] = useState<string | null>(null);
   const [mergeSuccess, setMergeSuccess] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [downloadFileName, setDownloadFileName] = useState('merged.pdf');
+  const [downloadFileName, setDownloadFileName] = useState(DEFAULT_MERGED_FILE_NAME);
 
   const resetMergeState = () => {
     setMergeError(null);
     setMergeSuccess(null);
     setDownloadUrl(null);
-    setDownloadFileName('merged.pdf');
+    setDownloadFileName(DEFAULT_MERGED_FILE_NAME);
   };
 
   const simulateUpload = (fileId: string) => {
@@ -186,7 +187,7 @@ export default function MergePDF() {
 
       const downloadInfo = await getJobDownloadInfo(queueResult.jobId);
       setDownloadUrl(downloadInfo.downloadUrl);
-      setDownloadFileName(downloadInfo.fileName || 'merged.pdf');
+      setDownloadFileName(downloadInfo.fileName || DEFAULT_MERGED_FILE_NAME);
       setMergeSuccess('PDF files merged successfully.');
 
       setFiles((prev) =>

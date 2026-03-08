@@ -15,8 +15,6 @@ const getErrorMessage = async (response: Response) => {
   }
 };
 
-const stripExtension = (name: string) => name.replace(/\.[^/.]+$/, '');
-
 const ensurePdfName = (name: string) => {
   const trimmed = name.trim();
   if (!trimmed) {
@@ -86,7 +84,7 @@ export const rotatePdfFile = async (
   return requestProcessedPdf(
     '/api/rotate-pdf',
     formData,
-    `${stripExtension(file.name)}-rotated.pdf`
+    file.name
   );
 };
 
@@ -103,7 +101,7 @@ export const deletePdfPagesFile = async (
   return requestProcessedPdf(
     '/api/delete-pages',
     formData,
-    `${stripExtension(file.name)}-pages-deleted.pdf`
+    file.name
   );
 };
 
@@ -124,7 +122,7 @@ export const addPdfPageNumbersFile = async (
   return requestProcessedPdf(
     '/api/add-page-numbers',
     formData,
-    `${stripExtension(file.name)}-numbered.pdf`
+    file.name
   );
 };
 
@@ -153,7 +151,7 @@ export const addPdfWatermarkFile = async (
   return requestProcessedPdf(
     '/api/add-watermark',
     formData,
-    `${stripExtension(file.name)}-watermarked.pdf`
+    file.name
   );
 };
 

@@ -595,7 +595,7 @@ const cropHandler = asyncHandler(async (req, res) => {
   const height = parsePositiveInteger(req.body.height, 'height', { min: 1, max: 20000 });
   const extension = resolveFileExtension(sourceFile);
   const baseName = sanitizeBaseName(sourceFile.originalname, 'image');
-  const outputName = `${baseName}-cropped.${extension}`;
+  const outputName = `${baseName}.${extension}`;
   let outputPath = '';
 
   try {
@@ -637,7 +637,7 @@ const rotateHandler = asyncHandler(async (req, res) => {
   const angle = parseFiniteNumber(req.body.angle, 'angle', { min: -3600, max: 3600 });
   const extension = resolveFileExtension(req.file);
   const baseName = sanitizeBaseName(req.file.originalname, 'image');
-  const outputName = `${baseName}-rotated.${extension}`;
+  const outputName = `${baseName}.${extension}`;
   const outputPath = path.join(PROCESSED_DIR, `${Date.now()}-${randomUUID()}-rotate.${extension}`);
   const qualityArgs = extension === 'jpg' || extension === 'webp' ? ['-quality', '100'] : [];
 
@@ -729,7 +729,7 @@ const resizeHandler = asyncHandler(async (req, res) => {
 
   const extension = resolveFileExtension(req.file);
   const baseName = sanitizeBaseName(req.file.originalname, 'image');
-  const outputName = `${baseName}-resized.${extension}`;
+  const outputName = `${baseName}.${extension}`;
   const outputPath = path.join(PROCESSED_DIR, `${Date.now()}-${randomUUID()}-resize.${extension}`);
 
   try {
@@ -787,7 +787,7 @@ const watermarkHandler = asyncHandler(async (req, res) => {
 
   const extension = resolveFileExtension(sourceFile);
   const baseName = sanitizeBaseName(sourceFile.originalname, 'image');
-  const outputName = `${baseName}-watermarked.${extension}`;
+  const outputName = `${baseName}.${extension}`;
   const outputPath = path.join(
     PROCESSED_DIR,
     `${Date.now()}-${randomUUID()}-watermark.${extension}`
@@ -882,7 +882,11 @@ router.post(
     }
 
     const outputPath = path.join(PROCESSED_DIR, `${Date.now()}-${randomUUID()}-images.pdf`);
-    const outputName = `images-${Date.now()}.pdf`;
+    const primaryBaseName = sanitizeBaseName(files[0]?.originalname, 'images');
+    const outputName =
+      files.length === 1
+        ? `${primaryBaseName}.pdf`
+        : `${primaryBaseName}_output.pdf`;
     const inputPaths = files.map((file) => file.path);
 
     try {
@@ -912,7 +916,7 @@ router.post(
       ? 20
       : parseFiniteNumber(req.body.fuzz, 'fuzz', { min: 0, max: 100 });
 
-    const outputName = `${sanitizeBaseName(req.file.originalname, 'image')}-transparent.png`;
+    const outputName = `${sanitizeBaseName(req.file.originalname, 'image')}.png`;
     const outputPath = path.join(PROCESSED_DIR, `${Date.now()}-${randomUUID()}-remove-bg.png`);
 
     try {

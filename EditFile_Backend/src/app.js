@@ -19,6 +19,10 @@ import mergePdfRoutes from './modules/merge-pdf/route.js';
 import splitPdfRoutes from './modules/split-pdf/route.js';
 import pdfToWordRoutes from './modules/pdf-to-word/route.js';
 import wordToPdfRoutes from './modules/word-to-pdf/route.js';
+import excelToPdfRoutes from './modules/excel-to-pdf/route.js';
+import pdfToExcelRoutes from './modules/pdf-to-excel/route.js';
+import powerpointToPdfRoutes from './modules/powerpoint-to-pdf/route.js';
+import pdfToPowerpointRoutes from './modules/pdf-to-powerpoint/route.js';
 import pdfToJpgRoutes from './modules/pdf-to-jpg/route.js';
 import jpgToPdfRoutes from './modules/jpg-to-pdf/route.js';
 import protectPdfRoutes from './modules/protect-pdf/route.js';
@@ -94,6 +98,7 @@ if (isLocalMode) {
   app.get('/api/local-download', async (req, res, next) => {
     try {
       const key = req.query.key;
+      const requestedFileName = req.query.filename;
       if (!key || typeof key !== 'string') {
         return res.status(400).json({
           success: false,
@@ -102,8 +107,12 @@ if (isLocalMode) {
       }
 
       const file = await readLocalFileByKey(key);
+      const safeFileName =
+        typeof requestedFileName === 'string' && requestedFileName.trim()
+          ? requestedFileName.replace(/["\\\r\n]/g, '_').trim()
+          : file.fileName;
       res.setHeader('Content-Type', file.contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${safeFileName}"`);
       return res.send(file.buffer);
     } catch (error) {
       return next(error);
@@ -119,6 +128,10 @@ app.use('/api/merge-pdf', mergePdfRoutes);
 app.use('/api/split-pdf', splitPdfRoutes);
 app.use('/api/pdf-to-word', pdfToWordRoutes);
 app.use('/api/word-to-pdf', wordToPdfRoutes);
+app.use('/api/excel-to-pdf', excelToPdfRoutes);
+app.use('/api/pdf-to-excel', pdfToExcelRoutes);
+app.use('/api/powerpoint-to-pdf', powerpointToPdfRoutes);
+app.use('/api/pdf-to-powerpoint', pdfToPowerpointRoutes);
 app.use('/api/pdf-to-jpg', pdfToJpgRoutes);
 app.use('/api/jpg-to-pdf', jpgToPdfRoutes);
 app.use('/api/protect-pdf', protectPdfRoutes);

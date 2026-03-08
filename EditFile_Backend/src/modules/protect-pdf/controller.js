@@ -47,6 +47,7 @@ export const protectPdf = asyncHandler(async (req, res) => {
       fileUrl,
       password,
       permissions,
+      originalName: file.originalname,
     });
 
     const duration = Date.now() - startTime;

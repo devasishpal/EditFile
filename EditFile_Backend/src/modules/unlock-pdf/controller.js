@@ -47,6 +47,7 @@ export const unlockPdf = asyncHandler(async (req, res) => {
       jobId: job.id,
       fileUrl,
       password,
+      originalName: file.originalname,
     });
 
     const duration = Date.now() - startTime;

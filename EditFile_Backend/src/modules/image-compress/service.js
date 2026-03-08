@@ -163,7 +163,7 @@ const compressBufferWithSharp = async ({
 
   return {
     quality: bestCandidate.quality,
-    fileName: `${getBaseName(originalName, 'image')}-compressed.${extension}`,
+    fileName: `${getBaseName(originalName, 'image')}.${extension}`,
     contentType: getMimeTypeForFormat(format),
     buffer: bestCandidate.buffer,
     size: bestCandidate.size,
@@ -232,7 +232,7 @@ const compressBuffer = async ({
 
     return {
       quality: bestCandidate.quality,
-      fileName: `${getBaseName(originalName, 'image')}-compressed.${extension}`,
+      fileName: `${getBaseName(originalName, 'image')}.${extension}`,
       contentType: getMimeTypeForFormat(format),
       buffer: bestCandidate.buffer,
       size: bestCandidate.size,
@@ -307,7 +307,7 @@ export const processImageCompress = async (jobData) => {
     const { outputUrl, outputBuffer, outputFileName, outputContentType } = await uploadProcessedFiles({
       jobId,
       files: processedFiles,
-      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}-compressed`,
+      fallbackBaseName: `${getBaseName(fileUrls[0]?.name, 'image')}_output`,
     });
 
     await completeJob(jobId, outputUrl, outputBuffer.length);

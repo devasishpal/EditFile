@@ -102,7 +102,7 @@ const normalizeCropSelection = (cropper: Cropper): CropSelection => {
 
 const getPassportDownloadName = (fileName: string) => {
   const baseName = fileName.replace(/\.[^.]+$/, '');
-  return `${baseName}-passport.png`;
+  return `${baseName}.png`;
 };
 
 const getExtensionFromMimeType = (mimeType: string) => {
@@ -682,7 +682,7 @@ export default function PassportSizePhotoMaker() {
       const extension = getExtensionFromMimeType(sourceContentType);
       const croppedFile = new File(
         [croppedResult.blob],
-        `${selectedFile.name.replace(/\.[^.]+$/, '')}-cropped.${extension}`,
+        `${selectedFile.name.replace(/\.[^.]+$/, '')}.${extension}`,
         { type: sourceContentType }
       );
       const outputWidth = Math.max(1, passportDimensions.width);

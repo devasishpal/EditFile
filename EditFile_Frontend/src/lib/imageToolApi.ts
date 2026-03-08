@@ -16,6 +16,15 @@ const getErrorMessage = async (response: Response) => {
   }
 };
 
+const stripExtension = (name: string) => name.replace(/\.[^/.]+$/, '');
+
+const withExtension = (name: string, extension: string, fallbackBase = 'file') => {
+  const normalizedExtension = extension.replace(/^\./, '').trim().toLowerCase();
+  const trimmed = name.trim();
+  const base = stripExtension(trimmed || fallbackBase).trim() || fallbackBase;
+  return normalizedExtension ? `${base}.${normalizedExtension}` : base;
+};
+
 const extractFileName = (value: string | null, fallback: string) => {
   if (!value) {
     return fallback;
@@ -70,7 +79,7 @@ export const cropImageFile = async (
   };
 
   try {
-    return await requestProcessedFile('/api/crop-image', appendCropPayload(), `${file.name}-cropped`);
+    return await requestProcessedFile('/api/crop-image', appendCropPayload(), file.name);
   } catch (error) {
     const message = error instanceof Error ? error.message.toLowerCase() : '';
     const shouldFallback =
@@ -82,7 +91,7 @@ export const cropImageFile = async (
       throw error;
     }
 
-    return requestProcessedFile('/api/image-tools/crop', appendCropPayload(), `${file.name}-cropped`);
+    return requestProcessedFile('/api/image-tools/crop', appendCropPayload(), file.name);
   }
 };
 
@@ -91,7 +100,7 @@ export const rotateImageFile = async (file: File, angle: number) => {
   formData.append('file', file);
   formData.append('angle', String(angle));
 
-  return requestProcessedFile('/api/image-tools/rotate', formData, `${file.name}-rotated`);
+  return requestProcessedFile('/api/image-tools/rotate', formData, file.name);
 };
 
 export const convertImageFile = async (
@@ -102,7 +111,7 @@ export const convertImageFile = async (
   formData.append('file', file);
   formData.append('targetFormat', targetFormat);
 
-  return requestProcessedFile('/api/image-tools/convert', formData, `${file.name}.${targetFormat}`);
+  return requestProcessedFile('/api/image-tools/convert', formData, withExtension(file.name, targetFormat));
 };
 
 export const resizeImageFile = async (
@@ -119,7 +128,7 @@ export const resizeImageFile = async (
   formData.append('height', String(options.height));
   formData.append('maintainAspectRatio', String(options.maintainAspectRatio));
 
-  return requestProcessedFile('/api/image-tools/resize', formData, `${file.name}-resized`);
+  return requestProcessedFile('/api/image-tools/resize', formData, file.name);
 };
 
 export const watermarkImageFile = async (
@@ -154,7 +163,7 @@ export const watermarkImageFile = async (
     formData.append('watermarkImage', options.watermarkImage);
   }
 
-  return requestProcessedFile('/api/image-tools/watermark', formData, `${file.name}-watermarked`);
+  return requestProcessedFile('/api/image-tools/watermark', formData, file.name);
 };
 
 export const convertImagesToPdf = async (files: File[]) => {
@@ -163,7 +172,13 @@ export const convertImagesToPdf = async (files: File[]) => {
     formData.append('files', file);
   });
 
-  return requestProcessedFile('/api/image-to-pdf', formData, 'images.pdf');
+  const primaryName = files[0]?.name || 'images';
+  const fallbackName =
+    files.length === 1
+      ? withExtension(primaryName, 'pdf', 'images')
+      : `${stripExtension(primaryName)}_output.pdf`;
+
+  return requestProcessedFile('/api/image-to-pdf', formData, fallbackName);
 };
 
 export const removeImageBackground = async (file: File, fuzz = 20) => {
@@ -171,7 +186,7 @@ export const removeImageBackground = async (file: File, fuzz = 20) => {
   formData.append('file', file);
   formData.append('fuzz', String(fuzz));
 
-  return requestProcessedFile('/api/remove-background', formData, `${file.name}-transparent.png`);
+  return requestProcessedFile('/api/remove-background', formData, withExtension(file.name, 'png'));
 };
 
 export const convertToPassportPhotoFile = async (
@@ -188,7 +203,7 @@ export const convertToPassportPhotoFile = async (
     formData.append('height', String(options?.height));
   }
 
-  return requestProcessedFile('/api/passport-photo', formData, `${file.name}-passport.png`);
+  return requestProcessedFile('/api/passport-photo', formData, withExtension(file.name, 'png'));
 };
 
 export const downloadProcessedAsset = (asset: ProcessedAsset) => {

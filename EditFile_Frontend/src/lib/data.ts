@@ -7,7 +7,7 @@ export const pdfTools: Tool[] = [
     description: 'Reduce PDF file size while maintaining quality',
     icon: 'Minimize2',
     category: 'pdf',
-    href: '/tools/compress-pdf',
+    href: '/pdf-tools/compress-pdf',
     popular: true,
   },
   {
@@ -16,7 +16,7 @@ export const pdfTools: Tool[] = [
     description: 'Combine multiple PDFs into one document',
     icon: 'Combine',
     category: 'pdf',
-    href: '/tools/merge-pdf',
+    href: '/pdf-tools/merge-pdf',
     popular: true,
   },
   {
@@ -25,7 +25,7 @@ export const pdfTools: Tool[] = [
     description: 'Extract pages or split by range',
     icon: 'Scissors',
     category: 'pdf',
-    href: '/tools/split-pdf',
+    href: '/pdf-tools/split-pdf',
   },
   {
     id: 'extract-pages',
@@ -33,7 +33,7 @@ export const pdfTools: Tool[] = [
     description: 'Save specific pages as new PDF',
     icon: 'FileOutput',
     category: 'pdf',
-    href: '/tools/extract-pages',
+    href: '/pdf-tools/extract-pages',
   },
   {
     id: 'rotate-pdf',
@@ -41,7 +41,7 @@ export const pdfTools: Tool[] = [
     description: 'Rotate pages to the correct orientation',
     icon: 'RotateCw',
     category: 'pdf',
-    href: '/rotate-pdf',
+    href: '/pdf-tools/rotate-pdf',
   },
   {
     id: 'delete-pages',
@@ -49,7 +49,7 @@ export const pdfTools: Tool[] = [
     description: 'Remove unwanted pages from PDF',
     icon: 'Trash2',
     category: 'pdf',
-    href: '/delete-pages',
+    href: '/pdf-tools/delete-pages',
   },
   {
     id: 'add-page-numbers',
@@ -57,7 +57,7 @@ export const pdfTools: Tool[] = [
     description: 'Number pages with custom formatting',
     icon: 'Hash',
     category: 'pdf',
-    href: '/add-page-numbers',
+    href: '/pdf-tools/add-page-numbers',
   },
   {
     id: 'add-watermark',
@@ -65,7 +65,7 @@ export const pdfTools: Tool[] = [
     description: 'Add text or image watermarks',
     icon: 'Droplets',
     category: 'pdf',
-    href: '/add-watermark',
+    href: '/pdf-tools/add-watermark',
   },
   {
     id: 'protect-pdf',
@@ -73,7 +73,7 @@ export const pdfTools: Tool[] = [
     description: 'Add password security to keep your PDF files protected',
     icon: 'Lock',
     category: 'pdf',
-    href: '/tools/protect-pdf',
+    href: '/pdf-tools/protect-pdf',
   },
   {
     id: 'unlock-pdf',
@@ -81,7 +81,7 @@ export const pdfTools: Tool[] = [
     description: 'Remove password protection from secured PDF documents',
     icon: 'Unlock',
     category: 'pdf',
-    href: '/tools/unlock-pdf',
+    href: '/pdf-tools/unlock-pdf',
   },
   {
     id: 'pdf-to-word',
@@ -89,7 +89,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PDF into editable DOCX while keeping formatting',
     icon: 'FileText',
     category: 'pdf',
-    href: '/tools/pdf-to-word',
+    href: '/pdf-tools/pdf-to-word',
     popular: true,
   },
   {
@@ -98,7 +98,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert DOCX files into clean and shareable PDFs',
     icon: 'FileType',
     category: 'pdf',
-    href: '/tools/word-to-pdf',
+    href: '/pdf-tools/word-to-pdf',
   },
   {
     id: 'pdf-to-jpg',
@@ -106,7 +106,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert each PDF page into high-quality JPG images',
     icon: 'Image',
     category: 'pdf',
-    href: '/tools/pdf-to-jpg',
+    href: '/pdf-tools/pdf-to-jpg',
   },
   {
     id: 'jpg-to-pdf',
@@ -114,7 +114,7 @@ export const pdfTools: Tool[] = [
     description: 'Combine JPG images into a single PDF document',
     icon: 'Images',
     category: 'pdf',
-    href: '/tools/jpg-to-pdf',
+    href: '/pdf-tools/jpg-to-pdf',
   },
   {
     id: 'ocr-pdf',
@@ -122,7 +122,7 @@ export const pdfTools: Tool[] = [
     description: 'Extract searchable text from scanned PDF documents',
     icon: 'ScanText',
     category: 'pdf',
-    href: '/tools/ocr-pdf',
+    href: '/pdf-tools/ocr-pdf',
     new: true,
   },
   {
@@ -131,7 +131,7 @@ export const pdfTools: Tool[] = [
     description: 'Repair damaged PDF files and recover readable content',
     icon: 'Wrench',
     category: 'pdf',
-    href: '/tools/repair-pdf',
+    href: '/pdf-tools/repair-pdf',
   },
   {
     id: 'organize-pdf',
@@ -139,7 +139,7 @@ export const pdfTools: Tool[] = [
     description: 'Drag, reorder, and arrange PDF pages with ease',
     icon: 'LayoutGrid',
     category: 'pdf',
-    href: '/tools/organize-pdf',
+    href: '/pdf-tools/organize-pdf',
     new: true,
   },
   {
@@ -148,7 +148,7 @@ export const pdfTools: Tool[] = [
     description: 'Turn scanned images into a PDF document',
     icon: 'ScanText',
     category: 'pdf',
-    href: '/tools/scan-to-pdf',
+    href: '/pdf-tools/scan-to-pdf',
   },
   {
     id: 'powerpoint-to-pdf',
@@ -156,8 +156,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PPT/PPTX slides into PDF',
     icon: 'FileType',
     category: 'pdf',
-    href: '/tools/powerpoint-to-pdf',
-    comingSoon: true,
+    href: '/pdf-tools/powerpoint-to-pdf',
   },
   {
     id: 'excel-to-pdf',
@@ -165,8 +164,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert XLS/XLSX spreadsheets into PDF',
     icon: 'FileType',
     category: 'pdf',
-    href: '/tools/excel-to-pdf',
-    comingSoon: true,
+    href: '/pdf-tools/excel-to-pdf',
   },
   {
     id: 'html-to-pdf',
@@ -174,7 +172,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert HTML documents into PDF',
     icon: 'FileType',
     category: 'pdf',
-    href: '/tools/html-to-pdf',
+    href: '/pdf-tools/html-to-pdf',
     comingSoon: true,
   },
   {
@@ -183,8 +181,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PDF into editable PPT slides',
     icon: 'FileText',
     category: 'pdf',
-    href: '/tools/pdf-to-powerpoint',
-    comingSoon: true,
+    href: '/pdf-tools/pdf-to-powerpoint',
   },
   {
     id: 'pdf-to-excel',
@@ -192,8 +189,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PDF tables into XLSX sheets',
     icon: 'FileText',
     category: 'pdf',
-    href: '/tools/pdf-to-excel',
-    comingSoon: true,
+    href: '/pdf-tools/pdf-to-excel',
   },
   {
     id: 'pdf-to-pdfa',
@@ -201,7 +197,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PDF files to archival PDF/A format',
     icon: 'FileOutput',
     category: 'pdf',
-    href: '/tools/pdf-to-pdfa',
+    href: '/pdf-tools/pdf-to-pdfa',
     comingSoon: true,
   },
   {
@@ -210,7 +206,7 @@ export const pdfTools: Tool[] = [
     description: 'Edit text, images, and layout in PDF pages',
     icon: 'FileText',
     category: 'pdf',
-    href: '/tools/edit-pdf',
+    href: '/pdf-tools/edit-pdf',
     comingSoon: true,
   },
   {
@@ -219,7 +215,7 @@ export const pdfTools: Tool[] = [
     description: 'Crop PDF pages to remove unwanted margins',
     icon: 'Crop',
     category: 'pdf',
-    href: '/tools/crop-pdf',
+    href: '/pdf-tools/crop-pdf',
     comingSoon: true,
   },
   {
@@ -228,7 +224,7 @@ export const pdfTools: Tool[] = [
     description: 'Add digital or handwritten signatures to PDF files',
     icon: 'FileText',
     category: 'pdf',
-    href: '/tools/sign-pdf',
+    href: '/pdf-tools/sign-pdf',
     comingSoon: true,
   },
   {
@@ -237,7 +233,7 @@ export const pdfTools: Tool[] = [
     description: 'Permanently hide sensitive PDF content',
     icon: 'Trash2',
     category: 'pdf',
-    href: '/tools/redact-pdf',
+    href: '/pdf-tools/redact-pdf',
     comingSoon: true,
   },
   {
@@ -246,7 +242,7 @@ export const pdfTools: Tool[] = [
     description: 'Compare two PDF files and highlight differences',
     icon: 'LayoutGrid',
     category: 'pdf',
-    href: '/tools/compare-pdf',
+    href: '/pdf-tools/compare-pdf',
     comingSoon: true,
   },
   {
@@ -255,7 +251,7 @@ export const pdfTools: Tool[] = [
     description: 'Translate PDF content to another language',
     icon: 'RefreshCw',
     category: 'pdf',
-    href: '/tools/translate-pdf',
+    href: '/pdf-tools/translate-pdf',
     comingSoon: true,
   },
 ];
@@ -267,7 +263,7 @@ export const imageTools: Tool[] = [
     description: 'Reduce image size with quality control',
     icon: 'Minimize2',
     category: 'image',
-    href: '/tools/compress-image',
+    href: '/image-tools/compress-image',
     popular: true,
   },
   {
@@ -276,7 +272,7 @@ export const imageTools: Tool[] = [
     description: 'Resize image dimensions with aspect ratio lock support',
     icon: 'Maximize2',
     category: 'image',
-    href: '/tools/resize-image',
+    href: '/image-tools/resize-image',
   },
   {
     id: 'crop-image',
@@ -284,7 +280,7 @@ export const imageTools: Tool[] = [
     description: 'Crop images to exact dimensions for perfect framing',
     icon: 'Crop',
     category: 'image',
-    href: '/tools/crop-image',
+    href: '/image-tools/crop-image',
   },
   {
     id: 'rotate-image',
@@ -292,7 +288,7 @@ export const imageTools: Tool[] = [
     description: 'Rotate, flip, and straighten images in one place',
     icon: 'RotateCw',
     category: 'image',
-    href: '/tools/rotate-image',
+    href: '/image-tools/rotate-image',
   },
   {
     id: 'convert-image',
@@ -300,7 +296,7 @@ export const imageTools: Tool[] = [
     description: 'Convert between PNG, JPG, and WEBP formats quickly',
     icon: 'RefreshCw',
     category: 'image',
-    href: '/tools/convert-image',
+    href: '/image-tools/convert-image',
   },
   {
     id: 'image-to-pdf',
@@ -308,7 +304,7 @@ export const imageTools: Tool[] = [
     description: 'Convert one or more images into a PDF document',
     icon: 'FileImage',
     category: 'image',
-    href: '/tools/image-to-pdf',
+    href: '/image-tools/image-to-pdf',
   },
   {
     id: 'remove-background',
@@ -316,7 +312,7 @@ export const imageTools: Tool[] = [
     description: 'Remove image backgrounds automatically with AI precision',
     icon: 'Wand2',
     category: 'image',
-    href: '/tools/remove-background',
+    href: '/image-tools/remove-background',
     new: true,
   },
   {
@@ -325,7 +321,7 @@ export const imageTools: Tool[] = [
     description: 'Create 413 x 531 passport photo with editable background',
     icon: 'Wand2',
     category: 'image',
-    href: '/tools/passport-photo-maker',
+    href: '/image-tools/passport-photo-maker',
     new: true,
   },
   {
@@ -334,7 +330,7 @@ export const imageTools: Tool[] = [
     description: 'Add text or logo watermarks to your images',
     icon: 'Droplets',
     category: 'image',
-    href: '/tools/image-watermark',
+    href: '/image-tools/image-watermark',
   },
 ];
 
