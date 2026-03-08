@@ -7,7 +7,7 @@ import {
   Minimize2, Combine, Scissors, FileOutput, RotateCw, Trash2,
   Hash, Droplets, Lock, Unlock, FileText, FileType, Image, Images,
   ScanText, Wrench, LayoutGrid, Maximize2, Crop, RefreshCw,
-  FileImage, Wand2, Star, Sparkles, ArrowRight
+  FileImage, Wand2, Star, Sparkles, Clock3, ArrowRight
 } from 'lucide-react';
 import { commonTools, availablePdfTools, availableImageTools } from '@/lib/data';
 
@@ -18,7 +18,7 @@ const iconMap: Record<string, React.ElementType> = {
   Minimize2, Combine, Scissors, FileOutput, RotateCw, Trash2,
   Hash, Droplets, Lock, Unlock, FileText, FileType, Image, Images,
   ScanText, Wrench, LayoutGrid, Maximize2, Crop, RefreshCw,
-  FileImage, Wand2, Star, Sparkles
+  FileImage, Wand2, Star, Sparkles, Clock3
 };
 
 interface ToolCardProps {
@@ -58,6 +58,12 @@ function ToolCard({ tool, index }: ToolCardProps) {
               <span className="sticker-label bg-violet text-white border-violet text-[9px] py-0.5">
                 <Sparkles className="w-3 h-3 mr-1" />
                 NEW
+              </span>
+            )}
+            {tool.comingSoon && (
+              <span className="sticker-label bg-amber-500 text-white border-amber-500 text-[9px] py-0.5">
+                <Clock3 className="w-3 h-3 mr-1" />
+                COMING SOON
               </span>
             )}
           </div>

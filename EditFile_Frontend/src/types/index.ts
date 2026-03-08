@@ -7,6 +7,7 @@ export interface Tool {
   href: string;
   popular?: boolean;
   new?: boolean;
+  comingSoon?: boolean;
 }
 
 export interface FileUpload {

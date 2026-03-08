@@ -3,24 +3,32 @@ import { availablePdfTools } from '@/lib/data';
 
 const pdfToolSections: ToolSection[] = [
   {
+    title: 'ORGANIZE PDF',
+    toolIds: ['merge-pdf', 'split-pdf', 'delete-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
+  },
+  {
     title: 'OPTIMIZE PDF',
     toolIds: ['compress-pdf', 'repair-pdf', 'ocr-pdf'],
   },
   {
-    title: 'ORGANIZE PDF',
-    toolIds: ['organize-pdf', 'merge-pdf', 'split-pdf', 'extract-pages', 'delete-pages'],
+    title: 'CONVERT TO PDF',
+    toolIds: ['jpg-to-pdf', 'word-to-pdf', 'powerpoint-to-pdf', 'excel-to-pdf', 'html-to-pdf'],
+  },
+  {
+    title: 'CONVERT FROM PDF',
+    toolIds: ['pdf-to-jpg', 'pdf-to-word', 'pdf-to-powerpoint', 'pdf-to-excel', 'pdf-to-pdfa'],
   },
   {
     title: 'EDIT PDF',
-    toolIds: ['rotate-pdf', 'add-page-numbers', 'add-watermark'],
+    toolIds: ['edit-pdf', 'crop-pdf', 'add-watermark', 'add-page-numbers', 'rotate-pdf'],
   },
   {
     title: 'PDF SECURITY',
-    toolIds: ['protect-pdf', 'unlock-pdf'],
+    toolIds: ['unlock-pdf', 'protect-pdf', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
   },
   {
-    title: 'CONVERT PDF',
-    toolIds: ['pdf-to-word', 'word-to-pdf', 'pdf-to-jpg', 'jpg-to-pdf'],
+    title: 'PDF INTELLIGENCE',
+    toolIds: ['translate-pdf'],
   },
 ];
 

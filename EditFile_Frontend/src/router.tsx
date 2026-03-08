@@ -26,6 +26,7 @@ import ImageToPDF from '@/tools/ImageToPDF';
 import RemoveBackground from '@/tools/RemoveBackground';
 import ImageWatermark from '@/tools/ImageWatermark';
 import PassportSizePhotoMaker from '@/tools/PassportSizePhotoMaker';
+import ComingSoonTool from '@/tools/ComingSoonTool';
 import PdfToolsPage from '@/pages/PdfToolsPage';
 import JpegToolsPage from '@/pages/JpegToolsPage';
 import AboutPage from '@/pages/AboutPage';
@@ -241,11 +242,225 @@ export const router = createBrowserRouter([
         path: 'jpg-to-pdf',
         element: (
           <ToolLayout
-            toolName="Image to PDF"
-            toolDescription="Combine images into PDF"
+            toolName="JPG to PDF"
+            toolDescription="Convert JPG images into a PDF"
             icon="Images"
           >
             <JPGToPDF />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'scan-to-pdf',
+        element: (
+          <ToolLayout
+            toolName="Scan to PDF"
+            toolDescription="Convert scanned images into a PDF"
+            icon="ScanText"
+          >
+            <JPGToPDF />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'powerpoint-to-pdf',
+        element: (
+          <ToolLayout
+            toolName="PowerPoint to PDF"
+            toolDescription="Convert PPT/PPTX slides into PDF"
+            icon="FileType"
+          >
+            <ComingSoonTool
+              title="PowerPoint to PDF is added"
+              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
+              suggestedToolHref="/tools/word-to-pdf"
+              suggestedToolLabel="Word to PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'excel-to-pdf',
+        element: (
+          <ToolLayout
+            toolName="Excel to PDF"
+            toolDescription="Convert XLS/XLSX spreadsheets into PDF"
+            icon="FileType"
+          >
+            <ComingSoonTool
+              title="Excel to PDF is added"
+              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
+              suggestedToolHref="/tools/word-to-pdf"
+              suggestedToolLabel="Word to PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'html-to-pdf',
+        element: (
+          <ToolLayout
+            toolName="HTML to PDF"
+            toolDescription="Convert HTML files into PDF"
+            icon="FileType"
+          >
+            <ComingSoonTool
+              title="HTML to PDF is added"
+              message="The tool page and route are ready. Backend conversion wiring can be enabled next."
+              suggestedToolHref="/tools/word-to-pdf"
+              suggestedToolLabel="Word to PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'pdf-to-powerpoint',
+        element: (
+          <ToolLayout
+            toolName="PDF to PowerPoint"
+            toolDescription="Convert PDF pages into PPT slides"
+            icon="FileText"
+          >
+            <ComingSoonTool
+              title="PDF to PowerPoint is added"
+              message="The tool page and route are ready. Conversion pipeline setup is pending."
+              suggestedToolHref="/tools/pdf-to-word"
+              suggestedToolLabel="PDF to Word"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'pdf-to-excel',
+        element: (
+          <ToolLayout
+            toolName="PDF to Excel"
+            toolDescription="Extract PDF tables into spreadsheet format"
+            icon="FileText"
+          >
+            <ComingSoonTool
+              title="PDF to Excel is added"
+              message="The tool page and route are ready. Conversion pipeline setup is pending."
+              suggestedToolHref="/tools/pdf-to-word"
+              suggestedToolLabel="PDF to Word"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'pdf-to-pdfa',
+        element: (
+          <ToolLayout
+            toolName="PDF to PDF/A"
+            toolDescription="Convert PDF files into archival PDF/A format"
+            icon="FileOutput"
+          >
+            <ComingSoonTool
+              title="PDF to PDF/A is added"
+              message="The tool page and route are ready. PDF/A conversion processing is pending."
+              suggestedToolHref="/tools/repair-pdf"
+              suggestedToolLabel="Repair PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'edit-pdf',
+        element: (
+          <ToolLayout
+            toolName="Edit PDF"
+            toolDescription="Edit text, images, and page layout in PDF files"
+            icon="FileText"
+          >
+            <ComingSoonTool
+              title="Edit PDF is added"
+              message="The tool page and route are ready. Rich content editing controls are pending."
+              suggestedToolHref="/tools/organize-pdf"
+              suggestedToolLabel="Organize PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'crop-pdf',
+        element: (
+          <ToolLayout
+            toolName="Crop PDF"
+            toolDescription="Crop PDF pages to remove unwanted margins"
+            icon="Crop"
+          >
+            <ComingSoonTool
+              title="Crop PDF is added"
+              message="The tool page and route are ready. Crop rectangle processing is pending."
+              suggestedToolHref="/tools/organize-pdf"
+              suggestedToolLabel="Organize PDF"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'sign-pdf',
+        element: (
+          <ToolLayout
+            toolName="Sign PDF"
+            toolDescription="Add signatures to PDF files"
+            icon="FileText"
+          >
+            <ComingSoonTool
+              title="Sign PDF is added"
+              message="The tool page and route are ready. Signature workflow integration is pending."
+              suggestedToolHref="/add-watermark"
+              suggestedToolLabel="Add Watermark"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'redact-pdf',
+        element: (
+          <ToolLayout
+            toolName="Redact PDF"
+            toolDescription="Hide sensitive information permanently"
+            icon="Trash2"
+          >
+            <ComingSoonTool
+              title="Redact PDF is added"
+              message="The tool page and route are ready. Permanent redaction processing is pending."
+              suggestedToolHref="/delete-pages"
+              suggestedToolLabel="Remove Pages"
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'compare-pdf',
+        element: (
+          <ToolLayout
+            toolName="Compare PDF"
+            toolDescription="Compare documents and inspect differences"
+            icon="LayoutGrid"
+          >
+            <ComingSoonTool
+              title="Compare PDF is added"
+              message="The tool page and route are ready. Diff analysis processing is pending."
+            />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'translate-pdf',
+        element: (
+          <ToolLayout
+            toolName="Translate PDF"
+            toolDescription="Translate PDF content to another language"
+            icon="RefreshCw"
+          >
+            <ComingSoonTool
+              title="Translate PDF is added"
+              message="The tool page and route are ready. Translation engine integration is pending."
+              suggestedToolHref="/tools/ocr-pdf"
+              suggestedToolLabel="OCR PDF"
+            />
           </ToolLayout>
         ),
       },

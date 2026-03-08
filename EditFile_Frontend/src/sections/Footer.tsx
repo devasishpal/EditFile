@@ -30,7 +30,14 @@ const socialLinks = [
   { name: 'Email', icon: Mail, href: 'mailto:support@typely.in' },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  disableMotion?: boolean;
+}
+
+export default function Footer({ disableMotion = false }: FooterProps) {
+  const bottomBarClassName =
+    'mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4';
+
   return (
     <footer className="relative w-full max-w-full bg-white z-[80] border-t-[3px] border-black overflow-x-clip">
       <div className="w-full px-4 sm:px-6 lg:px-12 py-12 lg:py-16">
@@ -121,22 +128,35 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <p className="text-gray text-sm text-center sm:text-left">
-            (c) 2026 EditFile. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="sticker-label text-[10px] bg-violet text-white border-violet">
-              Made with love worldwide
-            </span>
+        {disableMotion ? (
+          <div className={bottomBarClassName}>
+            <p className="text-gray text-sm text-center sm:text-left">
+              (c) 2026 EditFile. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="sticker-label text-[10px] bg-violet text-white border-violet">
+                Made with love worldwide
+              </span>
+            </div>
           </div>
-        </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={bottomBarClassName}
+          >
+            <p className="text-gray text-sm text-center sm:text-left">
+              (c) 2026 EditFile. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="sticker-label text-[10px] bg-violet text-white border-violet">
+                Made with love worldwide
+              </span>
+            </div>
+          </motion.div>
+        )}
       </div>
     </footer>
   );

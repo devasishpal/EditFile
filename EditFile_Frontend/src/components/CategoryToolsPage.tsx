@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,10 +26,10 @@ import {
   Wand2,
   Star,
   Sparkles,
+  Clock3,
 } from 'lucide-react';
 import type { Tool } from '@/types';
-
-const MotionLink = motion(Link);
+import Footer from '@/sections/Footer';
 
 const iconMap: Record<string, React.ElementType> = {
   Minimize2,
@@ -57,6 +56,7 @@ const iconMap: Record<string, React.ElementType> = {
   Wand2,
   Star,
   Sparkles,
+  Clock3,
 };
 
 interface CategoryToolsPageProps {
@@ -74,46 +74,55 @@ export interface ToolSection {
 
 interface ToolCardProps {
   tool: Tool;
-  index: number;
 }
 
-function ToolCard({ tool, index }: ToolCardProps) {
+function ToolCard({ tool }: ToolCardProps) {
   const Icon = iconMap[tool.icon] || FileText;
+  const hasTag = tool.popular || tool.new || tool.comingSoon;
 
   return (
-    <MotionLink
+    <Link
       to={tool.href}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.45, delay: index * 0.04 }}
-      whileHover={{ y: -4, scale: 1.02 }}
-      className="sticker-card min-h-[160px] sm:min-h-[170px] p-5 group cursor-pointer transition-all duration-200 hover:shadow-sticker-lg"
+      className="sticker-card h-[176px] sm:h-[184px] p-4 sm:p-5 cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-1 hover:shadow-sticker-lg"
     >
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-violet/20 transition-colors">
-          <Icon className="w-6 h-6 text-violet" />
+      <div className="flex h-full items-start gap-3">
+        <div className="w-11 h-11 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-violet" />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-display font-bold text-dark text-base">{tool.name}</h3>
-            {tool.popular && (
-              <span className="sticker-label bg-pink text-white border-pink text-[9px] py-0.5">
-                <Star className="w-3 h-3 mr-1" />
-                POPULAR
-              </span>
-            )}
-            {tool.new && (
-              <span className="sticker-label bg-violet text-white border-violet text-[9px] py-0.5">
-                <Sparkles className="w-3 h-3 mr-1" />
-                NEW
-              </span>
+        <div className="flex-1 min-w-0 pt-1">
+          <h3 className="font-display font-bold text-dark text-base leading-tight [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden">
+            {tool.name}
+          </h3>
+          <div className="mt-2 h-6">
+            {hasTag && (
+              <div className="flex items-center gap-2">
+                {tool.popular && (
+                  <span className="sticker-label bg-pink text-white border-pink text-[9px] py-0.5">
+                    <Star className="w-3 h-3 mr-1" />
+                    POPULAR
+                  </span>
+                )}
+                {tool.new && (
+                  <span className="sticker-label bg-violet text-white border-violet text-[9px] py-0.5">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    NEW
+                  </span>
+                )}
+                {tool.comingSoon && (
+                  <span className="sticker-label bg-amber-500 text-white border-amber-500 text-[9px] py-0.5">
+                    <Clock3 className="w-3 h-3 mr-1" />
+                    COMING SOON
+                  </span>
+                )}
+              </div>
             )}
           </div>
-          <p className="text-gray text-sm mt-1 leading-relaxed">{tool.description}</p>
+          <p className="text-gray text-sm mt-2 leading-relaxed [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden">
+            {tool.description}
+          </p>
         </div>
       </div>
-    </MotionLink>
+    </Link>
   );
 }
 
@@ -133,8 +142,6 @@ export default function CategoryToolsPage({
         .map((toolId) => toolById.get(toolId))
         .filter((tool): tool is Tool => Boolean(tool)),
     })) ?? [];
-
-  let animationIndex = 0;
 
   return (
     <div className="min-h-screen w-full max-w-full bg-violet relative overflow-x-clip">
@@ -156,7 +163,7 @@ export default function CategoryToolsPage({
           <div className="w-full sm:w-auto grid grid-cols-2 sm:flex items-center gap-2">
             <Link
               to="/pdf-tools"
-              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm transition-colors text-center ${
+              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm text-center ${
                 activeCategory === 'pdf'
                   ? 'bg-pink text-white border-black'
                   : 'bg-white text-dark border-black hover:bg-pink/10'
@@ -166,7 +173,7 @@ export default function CategoryToolsPage({
             </Link>
             <Link
               to="/image-tools"
-              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm transition-colors text-center ${
+              className={`px-3 sm:px-4 py-2 rounded-xl border-[2px] font-semibold text-xs sm:text-sm text-center ${
                 activeCategory === 'image'
                   ? 'bg-pink text-white border-black'
                   : 'bg-white text-dark border-black hover:bg-pink/10'
@@ -180,17 +187,12 @@ export default function CategoryToolsPage({
 
       <main className="relative z-10 w-full max-w-full px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-14">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="mb-10"
-          >
+          <div className="mb-10">
             <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight">
               {title}
             </h1>
             <p className="text-white/70 text-base sm:text-lg mt-4 max-w-3xl">{description}</p>
-          </motion.div>
+          </div>
 
           {hasSections ? (
             <div className="space-y-10">
@@ -200,35 +202,31 @@ export default function CategoryToolsPage({
                     {section.title}
                   </h2>
                   <div className="tool-cards-grid">
-                    {section.tools.map((tool) => {
-                      const cardIndex = animationIndex++;
-                      return <ToolCard key={tool.id} tool={tool} index={cardIndex} />;
-                    })}
+                    {section.tools.map((tool) => (
+                      <ToolCard key={tool.id} tool={tool} />
+                    ))}
                   </div>
                 </section>
               ))}
             </div>
           ) : (
             <div className="tool-cards-grid">
-              {tools.map((tool, index) => (
-                <ToolCard key={tool.id} tool={tool} index={index} />
+              {tools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} />
               ))}
             </div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.15 }}
-            className="text-center mt-12"
-          >
-            <Link to="/" className="sticker-button group">
+          <div className="text-center mt-12">
+            <Link to="/" className="sticker-button">
               Back to Landing
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </main>
+
+      <Footer disableMotion />
     </div>
   );
 }
