@@ -7,12 +7,16 @@ const imageToolSections: ToolSection[] = [
     toolIds: ['remove-background', 'passport-photo-maker'],
   },
   {
+    title: 'OPTIMIZE IMAGE',
+    toolIds: ['compress-image', 'resize-image'],
+  },
+  {
     title: 'IMAGE CONVERSION',
     toolIds: ['convert-image', 'image-to-pdf'],
   },
   {
     title: 'IMAGE EDITING',
-    toolIds: ['resize-image', 'crop-image', 'compress-image', 'rotate-image', 'image-watermark'],
+    toolIds: ['crop-image', 'rotate-image', 'image-watermark'],
   },
 ];
 

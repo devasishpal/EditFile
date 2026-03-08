@@ -88,7 +88,7 @@ function ToolCard({ tool, index }: ToolCardProps) {
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.45, delay: index * 0.04 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className="sticker-card h-[160px] sm:h-[170px] p-5 group cursor-pointer transition-all duration-200 hover:shadow-sticker-lg"
+      className="sticker-card min-h-[160px] sm:min-h-[170px] p-5 group cursor-pointer transition-all duration-200 hover:shadow-sticker-lg"
     >
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-violet/20 transition-colors">

@@ -20,11 +20,12 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const REMBG_TIMEOUT_MS = Number.parseInt(process.env.REMOVE_BG_TIMEOUT_MS || '30000', 10);
 const MAX_INPUT_WIDTH_BEFORE_RESIZE = 3000;
 const RESIZE_TARGET_WIDTH = 2000;
-const PASSPORT_WIDTH = 413;
-const PASSPORT_HEIGHT = 531;
+const DEFAULT_PASSPORT_WIDTH = 413;
+const DEFAULT_PASSPORT_HEIGHT = 531;
+const MAX_OUTPUT_DIMENSION = 5000;
 const ALPHA_THRESHOLD = 8;
 
-const DEPENDENCY_INSTALL_COMMAND = 'pip install rembg pillow onnxruntime';
+const DEPENDENCY_INSTALL_COMMAND = 'python -m pip install rembg pillow onnxruntime';
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/png',
@@ -50,6 +51,41 @@ const createHttpError = (status, message) => {
   const error = new Error(message);
   error.status = status;
   return error;
+};
+
+const parseRequestedOutputSize = (rawWidth, rawHeight) => {
+  const widthValue = String(rawWidth ?? '').trim();
+  const heightValue = String(rawHeight ?? '').trim();
+
+  if (!widthValue && !heightValue) {
+    return {
+      width: DEFAULT_PASSPORT_WIDTH,
+      height: DEFAULT_PASSPORT_HEIGHT,
+    };
+  }
+
+  if (!widthValue || !heightValue) {
+    throw createHttpError(400, 'Both width and height are required when setting custom output size');
+  }
+
+  const width = Number.parseInt(widthValue, 10);
+  const height = Number.parseInt(heightValue, 10);
+
+  if (
+    !Number.isInteger(width) ||
+    !Number.isInteger(height) ||
+    width < 1 ||
+    height < 1 ||
+    width > MAX_OUTPUT_DIMENSION ||
+    height > MAX_OUTPUT_DIMENSION
+  ) {
+    throw createHttpError(
+      400,
+      `width and height must be integers between 1 and ${MAX_OUTPUT_DIMENSION}`
+    );
+  }
+
+  return { width, height };
 };
 
 const createTempFilePath = (suffix) =>
@@ -120,14 +156,20 @@ const ensureRuntimeReady = async () => {
       await rembgPool.init();
     } catch (error) {
       const message = String(error?.message || '');
-      if (message.toLowerCase().includes('python')) {
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes('python')) {
         throw createHttpError(
           500,
           `Python 3 not found in PATH. Install Python and run: ${DEPENDENCY_INSTALL_COMMAND}`
         );
       }
 
-      if (message.toLowerCase().includes('onnxruntime') || message.toLowerCase().includes('rembg')) {
+      const isMissingDependencyError =
+        lowerMessage.includes("no module named 'onnxruntime'") ||
+        lowerMessage.includes("no module named 'rembg'") ||
+        lowerMessage.includes("no module named 'pil'");
+
+      if (isMissingDependencyError) {
         throw createHttpError(
           500,
           `Missing Python dependencies. Install with: ${DEPENDENCY_INSTALL_COMMAND}`
@@ -265,7 +307,7 @@ const getSubjectBounds = async (inputBuffer) => {
   };
 };
 
-const composePassportPhoto = async (transparentImagePath) => {
+const composePassportPhoto = async (transparentImagePath, outputSize) => {
   const transparentBuffer = await fs.readFile(transparentImagePath);
   const bounds = await getSubjectBounds(transparentBuffer);
 
@@ -279,7 +321,7 @@ const composePassportPhoto = async (transparentImagePath) => {
     .png()
     .toBuffer();
 
-  const scale = Math.min(PASSPORT_WIDTH / bounds.width, PASSPORT_HEIGHT / bounds.height);
+  const scale = Math.min(outputSize.width / bounds.width, outputSize.height / bounds.height);
   const resizedWidth = Math.max(1, Math.round(bounds.width * scale));
   const resizedHeight = Math.max(1, Math.round(bounds.height * scale));
 
@@ -292,13 +334,14 @@ const composePassportPhoto = async (transparentImagePath) => {
     .png()
     .toBuffer();
 
-  const left = Math.max(0, Math.floor((PASSPORT_WIDTH - resizedWidth) / 2));
-  const top = Math.max(0, Math.floor((PASSPORT_HEIGHT - resizedHeight) / 2));
+  const left = Math.max(0, Math.floor((outputSize.width - resizedWidth) / 2));
+  // Anchor the subject to the bottom edge so no extra band appears under shoulders.
+  const top = Math.max(0, outputSize.height - resizedHeight);
 
   return sharp({
     create: {
-      width: PASSPORT_WIDTH,
-      height: PASSPORT_HEIGHT,
+      width: outputSize.width,
+      height: outputSize.height,
       channels: 4,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     },
@@ -380,10 +423,14 @@ router.post(
       throw createHttpError(400, 'No file uploaded');
     }
 
+    const outputSize = parseRequestedOutputSize(req.body?.width, req.body?.height);
+
     logger.info('passport-photo: upload received', {
       fileName: req.file.originalname,
       mimeType: req.file.mimetype,
       sizeBytes: req.file.size,
+      outputWidth: outputSize.width,
+      outputHeight: outputSize.height,
     });
 
     const startedAtMs = Date.now();
@@ -402,10 +449,12 @@ router.post(
         fileName: req.file.originalname,
         sourceWidth,
         resized,
+        outputWidth: outputSize.width,
+        outputHeight: outputSize.height,
       });
 
       await runRemoveBackground(runtime, processingInputPath, transparentOutputPath);
-      const passportBuffer = await composePassportPhoto(transparentOutputPath);
+      const passportBuffer = await composePassportPhoto(transparentOutputPath, outputSize);
 
       logger.info('passport-photo: processing finished', {
         fileName: req.file.originalname,

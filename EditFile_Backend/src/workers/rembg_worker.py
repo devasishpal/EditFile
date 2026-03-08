@@ -14,7 +14,9 @@ def emit(payload):
     print(json.dumps(payload), flush=True)
 
 
-model_name = os.environ.get("REMBG_MODEL", "u2net")
+model_name = os.environ.get("REMBG_MODEL", "u2net").strip() or "u2net"
+if model_name.lower() == "auto":
+    model_name = "u2net"
 
 try:
     session = new_session(model_name)

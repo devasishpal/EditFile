@@ -21,7 +21,7 @@ const REMBG_TIMEOUT_MS = Number.parseInt(process.env.REMOVE_BG_TIMEOUT_MS || '30
 const MAX_INPUT_WIDTH_BEFORE_RESIZE = 3000;
 const RESIZE_TARGET_WIDTH = 2000;
 
-const DEPENDENCY_INSTALL_COMMAND = 'pip install rembg pillow onnxruntime';
+const DEPENDENCY_INSTALL_COMMAND = 'python -m pip install rembg pillow onnxruntime';
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/png',
@@ -117,14 +117,20 @@ const ensureRuntimeReady = async () => {
       await rembgPool.init();
     } catch (error) {
       const message = String(error?.message || '');
-      if (message.toLowerCase().includes('python')) {
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes('python')) {
         throw createHttpError(
           500,
           `Python 3 not found in PATH. Install Python and run: ${DEPENDENCY_INSTALL_COMMAND}`
         );
       }
 
-      if (message.toLowerCase().includes('onnxruntime') || message.toLowerCase().includes('rembg')) {
+      const isMissingDependencyError =
+        lowerMessage.includes("no module named 'onnxruntime'") ||
+        lowerMessage.includes("no module named 'rembg'") ||
+        lowerMessage.includes("no module named 'pil'");
+
+      if (isMissingDependencyError) {
         throw createHttpError(
           500,
           `Missing Python dependencies. Install with: ${DEPENDENCY_INSTALL_COMMAND}`

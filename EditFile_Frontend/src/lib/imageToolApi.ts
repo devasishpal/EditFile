@@ -174,9 +174,19 @@ export const removeImageBackground = async (file: File, fuzz = 20) => {
   return requestProcessedFile('/api/remove-background', formData, `${file.name}-transparent.png`);
 };
 
-export const convertToPassportPhotoFile = async (file: File) => {
+export const convertToPassportPhotoFile = async (
+  file: File,
+  options?: {
+    width?: number;
+    height?: number;
+  }
+) => {
   const formData = new FormData();
   formData.append('file', file);
+  if (Number.isInteger(options?.width) && Number.isInteger(options?.height)) {
+    formData.append('width', String(options?.width));
+    formData.append('height', String(options?.height));
+  }
 
   return requestProcessedFile('/api/passport-photo', formData, `${file.name}-passport.png`);
 };

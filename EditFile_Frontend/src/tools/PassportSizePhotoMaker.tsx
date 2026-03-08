@@ -24,11 +24,16 @@ interface CropSelection {
   height: number;
 }
 
+interface CropSizeInput {
+  width: string;
+  height: string;
+}
+
 type BackgroundChoice = 'white' | 'light-blue' | 'light-gray' | 'custom';
 
 const PASSPORT_WIDTH = 413;
 const PASSPORT_HEIGHT = 531;
-const PASSPORT_ASPECT_RATIO = `${PASSPORT_WIDTH} / ${PASSPORT_HEIGHT}`;
+const ALPHA_THRESHOLD = 8;
 
 const BACKGROUND_PRESETS: Array<{ id: Exclude<BackgroundChoice, 'custom'>; label: string; color: string }> = [
   { id: 'white', label: 'White', color: '#ffffff' },
@@ -41,6 +46,11 @@ const EMPTY_SELECTION: CropSelection = {
   y: 0,
   width: 0,
   height: 0,
+};
+
+const EMPTY_SIZE_INPUT: CropSizeInput = {
+  width: '0',
+  height: '0',
 };
 
 const toFiniteInt = (value: number, fallback: number) => {
@@ -117,9 +127,62 @@ const canvasToPngBlob = (canvas: HTMLCanvasElement): Promise<Blob> =>
     }, 'image/png');
   });
 
-const composePassportWithBackgroundColor = async (
+const getOpaqueBounds = (
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  const { data } = context.getImageData(0, 0, width, height);
+
+  let left = width;
+  let right = -1;
+  let top = height;
+  let bottom = -1;
+
+  for (let y = 0; y < height; y += 1) {
+    const rowOffset = y * width * 4;
+    for (let x = 0; x < width; x += 1) {
+      const alpha = data[rowOffset + x * 4 + 3];
+      if (alpha <= ALPHA_THRESHOLD) {
+        continue;
+      }
+
+      if (x < left) {
+        left = x;
+      }
+      if (x > right) {
+        right = x;
+      }
+      if (y < top) {
+        top = y;
+      }
+      if (y > bottom) {
+        bottom = y;
+      }
+    }
+  }
+
+  if (right < left || bottom < top) {
+    return {
+      left: 0,
+      top: 0,
+      width,
+      height,
+    };
+  }
+
+  return {
+    left,
+    top,
+    width: right - left + 1,
+    height: bottom - top + 1,
+  };
+};
+
+const recomposePassportBottomCenter = async (
   sourceBlob: Blob,
-  backgroundColor: string
+  outputSize: Dimensions,
+  backgroundColor?: string
 ): Promise<Blob> => {
   const sourceUrl = URL.createObjectURL(sourceBlob);
   try {
@@ -130,18 +193,54 @@ const composePassportWithBackgroundColor = async (
       instance.src = sourceUrl;
     });
 
+    const sourceWidth = Math.max(1, image.naturalWidth || image.width);
+    const sourceHeight = Math.max(1, image.naturalHeight || image.height);
+    const sourceCanvas = document.createElement('canvas');
+    sourceCanvas.width = sourceWidth;
+    sourceCanvas.height = sourceHeight;
+
+    const sourceContext = sourceCanvas.getContext('2d');
+    if (!sourceContext) {
+      throw new Error('Unable to prepare passport image');
+    }
+
+    sourceContext.clearRect(0, 0, sourceWidth, sourceHeight);
+    sourceContext.drawImage(image, 0, 0, sourceWidth, sourceHeight);
+    const bounds = getOpaqueBounds(sourceContext, sourceWidth, sourceHeight);
+
     const canvas = document.createElement('canvas');
-    canvas.width = PASSPORT_WIDTH;
-    canvas.height = PASSPORT_HEIGHT;
+    canvas.width = outputSize.width;
+    canvas.height = outputSize.height;
 
     const context = canvas.getContext('2d');
     if (!context) {
-      throw new Error('Unable to prepare passport download');
+      throw new Error('Unable to prepare passport output');
     }
 
-    context.fillStyle = backgroundColor;
-    context.fillRect(0, 0, PASSPORT_WIDTH, PASSPORT_HEIGHT);
-    context.drawImage(image, 0, 0, PASSPORT_WIDTH, PASSPORT_HEIGHT);
+    if (backgroundColor) {
+      context.fillStyle = backgroundColor;
+      context.fillRect(0, 0, outputSize.width, outputSize.height);
+    } else {
+      context.clearRect(0, 0, outputSize.width, outputSize.height);
+    }
+
+    const scale = Math.min(outputSize.width / bounds.width, outputSize.height / bounds.height);
+    const drawWidth = Math.max(1, Math.round(bounds.width * scale));
+    const drawHeight = Math.max(1, Math.round(bounds.height * scale));
+    const drawX = Math.max(0, Math.floor((outputSize.width - drawWidth) / 2));
+    const drawY = Math.max(0, outputSize.height - drawHeight);
+
+    context.drawImage(
+      sourceCanvas,
+      bounds.left,
+      bounds.top,
+      bounds.width,
+      bounds.height,
+      drawX,
+      drawY,
+      drawWidth,
+      drawHeight
+    );
 
     return canvasToPngBlob(canvas);
   } finally {
@@ -149,13 +248,40 @@ const composePassportWithBackgroundColor = async (
   }
 };
 
+const normalizePassportAsset = async (
+  asset: ProcessedAsset,
+  outputSize: Dimensions
+): Promise<ProcessedAsset> => {
+  const blob = await recomposePassportBottomCenter(asset.blob, outputSize);
+  const previewUrl = URL.createObjectURL(blob);
+  return {
+    ...asset,
+    blob,
+    previewUrl,
+    contentType: 'image/png',
+  };
+};
+
+const composePassportWithBackgroundColor = async (
+  sourceBlob: Blob,
+  backgroundColor: string,
+  outputSize: Dimensions
+): Promise<Blob> => {
+  return recomposePassportBottomCenter(sourceBlob, outputSize, backgroundColor);
+};
+
 export default function PassportSizePhotoMaker() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [croppedResult, setCroppedResult] = useState<ProcessedAsset | null>(null);
   const [passportResult, setPassportResult] = useState<ProcessedAsset | null>(null);
+  const [passportDimensions, setPassportDimensions] = useState<Dimensions>({
+    width: PASSPORT_WIDTH,
+    height: PASSPORT_HEIGHT,
+  });
   const [dimensions, setDimensions] = useState<Dimensions | null>(null);
   const [cropSelection, setCropSelection] = useState<CropSelection>(EMPTY_SELECTION);
+  const [cropSizeInput, setCropSizeInput] = useState<CropSizeInput>(EMPTY_SIZE_INPUT);
   const [backgroundChoice, setBackgroundChoice] = useState<BackgroundChoice>('white');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [isDragging, setIsDragging] = useState(false);
@@ -202,6 +328,13 @@ export default function PassportSizePhotoMaker() {
   useEffect(() => {
     passportPreviewRef.current = passportResult?.previewUrl || null;
   }, [passportResult]);
+
+  useEffect(() => {
+    setCropSizeInput({
+      width: String(cropSelection.width || 0),
+      height: String(cropSelection.height || 0),
+    });
+  }, [cropSelection.width, cropSelection.height]);
 
   useEffect(() => {
     return () => {
@@ -299,8 +432,13 @@ export default function PassportSizePhotoMaker() {
     setOriginalPreview(null);
     setCroppedResult(null);
     setPassportResult(null);
+    setPassportDimensions({
+      width: PASSPORT_WIDTH,
+      height: PASSPORT_HEIGHT,
+    });
     setDimensions(null);
     setCropSelection(EMPTY_SELECTION);
+    setCropSizeInput(EMPTY_SIZE_INPUT);
     setBackgroundChoice('white');
     setBackgroundColor('#ffffff');
     setError(null);
@@ -341,7 +479,12 @@ export default function PassportSizePhotoMaker() {
         setOriginalPreview(previewUrl);
         setCroppedResult(null);
         setPassportResult(null);
+        setPassportDimensions({
+          width: PASSPORT_WIDTH,
+          height: PASSPORT_HEIGHT,
+        });
         setCropSelection(EMPTY_SELECTION);
+        setCropSizeInput(EMPTY_SIZE_INPUT);
         setBackgroundChoice('white');
         setBackgroundColor('#ffffff');
         setIsCropping(false);
@@ -437,6 +580,10 @@ export default function PassportSizePhotoMaker() {
       revokePreviewUrl(passportResult?.previewUrl);
       setCroppedResult(nextResult);
       setPassportResult(null);
+      setPassportDimensions({
+        width: activeSelection.width,
+        height: activeSelection.height,
+      });
       setBackgroundChoice('white');
       setBackgroundColor('#ffffff');
     } catch (requestError) {
@@ -445,6 +592,75 @@ export default function PassportSizePhotoMaker() {
       setIsCropping(false);
     }
   }, [isCropping, selectedFile, cropSelection, dimensions, croppedResult, passportResult]);
+
+  const applyCropSize = useCallback((widthValue: string, heightValue: string) => {
+    const cropper = cropperRef.current;
+    if (!cropper) {
+      return false;
+    }
+
+    const parsedWidth = Number.parseInt(widthValue, 10);
+    const parsedHeight = Number.parseInt(heightValue, 10);
+
+    if (
+      !Number.isInteger(parsedWidth) ||
+      !Number.isInteger(parsedHeight) ||
+      parsedWidth < 1 ||
+      parsedHeight < 1
+    ) {
+      return false;
+    }
+
+    const imageData = cropper.getImageData();
+    const imageWidth = Math.max(
+      1,
+      toFiniteInt(imageData.naturalWidth, dimensions?.width || parsedWidth)
+    );
+    const imageHeight = Math.max(
+      1,
+      toFiniteInt(imageData.naturalHeight, dimensions?.height || parsedHeight)
+    );
+    const activeSelection = normalizeCropSelection(cropper);
+
+    const nextWidth = Math.min(parsedWidth, imageWidth);
+    const nextHeight = Math.min(parsedHeight, imageHeight);
+    const nextX = Math.max(0, Math.min(activeSelection.x, imageWidth - nextWidth));
+    const nextY = Math.max(0, Math.min(activeSelection.y, imageHeight - nextHeight));
+
+    cropper.setData({
+      x: nextX,
+      y: nextY,
+      width: nextWidth,
+      height: nextHeight,
+    });
+    syncSelectionFromCropper(cropper);
+    return true;
+  }, [dimensions, syncSelectionFromCropper]);
+
+  const handleCropSizeChange = useCallback((field: keyof CropSizeInput, value: string) => {
+    setCropSizeInput((previous) => {
+      const next = {
+        ...previous,
+        [field]: value,
+      };
+      applyCropSize(next.width, next.height);
+      return next;
+    });
+  }, [applyCropSize]);
+
+  const handleCropSizeCommit = useCallback(() => {
+    const applied = applyCropSize(cropSizeInput.width, cropSizeInput.height);
+    if (applied) {
+      setError(null);
+      return;
+    }
+
+    setCropSizeInput({
+      width: String(cropSelection.width || 0),
+      height: String(cropSelection.height || 0),
+    });
+    setError('Width and height must be positive numbers.');
+  }, [applyCropSize, cropSelection.width, cropSelection.height, cropSizeInput.width, cropSizeInput.height]);
 
   const handleConvertToPassport = useCallback(async () => {
     if (isConverting) {
@@ -469,15 +685,34 @@ export default function PassportSizePhotoMaker() {
         `${selectedFile.name.replace(/\.[^.]+$/, '')}-cropped.${extension}`,
         { type: sourceContentType }
       );
-      const nextPassport = await convertToPassportPhotoFile(croppedFile);
+      const outputWidth = Math.max(1, passportDimensions.width);
+      const outputHeight = Math.max(1, passportDimensions.height);
+      const nextPassportRaw = await convertToPassportPhotoFile(croppedFile, {
+        width: outputWidth,
+        height: outputHeight,
+      });
+      const nextPassport = await (async () => {
+        try {
+          return await normalizePassportAsset(nextPassportRaw, {
+            width: outputWidth,
+            height: outputHeight,
+          });
+        } finally {
+          revokePreviewUrl(nextPassportRaw.previewUrl);
+        }
+      })();
       revokePreviewUrl(passportResult?.previewUrl);
       setPassportResult(nextPassport);
+      setPassportDimensions({
+        width: outputWidth,
+        height: outputHeight,
+      });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Passport conversion failed');
     } finally {
       setIsConverting(false);
     }
-  }, [isConverting, croppedResult, selectedFile, passportResult]);
+  }, [isConverting, croppedResult, selectedFile, passportDimensions.width, passportDimensions.height, passportResult]);
 
   const handlePresetBackground = useCallback((choice: Exclude<BackgroundChoice, 'custom'>) => {
     const preset = BACKGROUND_PRESETS.find((item) => item.id === choice);
@@ -500,7 +735,11 @@ export default function PassportSizePhotoMaker() {
     }
 
     try {
-      const finalBlob = await composePassportWithBackgroundColor(passportResult.blob, backgroundColor);
+      const finalBlob = await composePassportWithBackgroundColor(
+        passportResult.blob,
+        backgroundColor,
+        passportDimensions
+      );
       downloadProcessedAsset({
         ...passportResult,
         blob: finalBlob,
@@ -514,7 +753,7 @@ export default function PassportSizePhotoMaker() {
           : 'Unable to download passport photo'
       );
     }
-  }, [passportResult, selectedFile, backgroundColor]);
+  }, [passportResult, selectedFile, backgroundColor, passportDimensions]);
 
   return (
     <div className="w-full px-3 sm:px-4 lg:px-6 py-8 overflow-x-clip">
@@ -564,36 +803,20 @@ export default function PassportSizePhotoMaker() {
             className="space-y-4"
           >
             <div className="sticker-card p-6">
-              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="font-display font-bold text-dark block mb-2">X</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={cropSelection.x}
-                    readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
-                    disabled={isCropping || isConverting}
-                  />
-                </div>
-                <div>
-                  <label className="font-display font-bold text-dark block mb-2">Y</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={cropSelection.y}
-                    readOnly
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
-                    disabled={isCropping || isConverting}
-                  />
-                </div>
+              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4">
                 <div>
                   <label className="font-display font-bold text-dark block mb-2">Width</label>
                   <input
                     type="number"
                     min={1}
-                    value={cropSelection.width}
-                    readOnly
+                    value={cropSizeInput.width}
+                    onChange={(event) => handleCropSizeChange('width', event.target.value)}
+                    onBlur={handleCropSizeCommit}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        handleCropSizeCommit();
+                      }
+                    }}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
                     disabled={isCropping || isConverting}
                   />
@@ -603,35 +826,30 @@ export default function PassportSizePhotoMaker() {
                   <input
                     type="number"
                     min={1}
-                    value={cropSelection.height}
-                    readOnly
+                    value={cropSizeInput.height}
+                    onChange={(event) => handleCropSizeChange('height', event.target.value)}
+                    onBlur={handleCropSizeCommit}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        handleCropSizeCommit();
+                      }
+                    }}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
                     disabled={isCropping || isConverting}
                   />
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-4 flex flex-wrap items-center gap-3">
                 <div className="text-sm text-gray">
                   {dimensions
                     ? `Image size: ${dimensions.width} x ${dimensions.height}`
                     : 'Loading image dimensions...'}
                 </div>
-                <button
-                  onClick={() => void handleCrop()}
-                  disabled={isCropping || isConverting}
-                  className="sticker-button disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isCropping ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Cropping...
-                    </>
-                  ) : (
-                    'Crop'
-                  )}
-                </button>
               </div>
+              <p className="text-xs text-gray mt-2">
+                Adjust crop area on image or type width/height.
+              </p>
 
               {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
             </div>
@@ -670,18 +888,33 @@ export default function PassportSizePhotoMaker() {
               </div>
             </div>
 
-            {croppedResult && (
-              <div className="sticker-card p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-display font-bold text-dark">Convert Stage</p>
-                    <p className="text-gray text-sm mt-1">
-                      Remove background and generate passport size (413 x 531)
-                    </p>
-                  </div>
+            <div className="sticker-card p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-display font-bold text-dark">Step Actions</p>
+                  <p className="text-gray text-sm mt-2">Step 1: Crop image first.</p>
+                  <p className="text-gray text-sm mt-2">
+                    Step 2: Convert to passport photo ({passportDimensions.width} x {passportDimensions.height}).
+                  </p>
+                </div>
+                <div className="w-full sm:w-auto flex flex-nowrap items-center justify-end gap-3 sm:shrink-0">
+                  <button
+                    onClick={() => void handleCrop()}
+                    disabled={isCropping || isConverting}
+                    className="sticker-button disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isCropping ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Cropping...
+                      </>
+                    ) : (
+                      'Crop'
+                    )}
+                  </button>
                   <button
                     onClick={() => void handleConvertToPassport()}
-                    disabled={isConverting || isCropping}
+                    disabled={!croppedResult || isConverting || isCropping}
                     className="sticker-button disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isConverting ? (
@@ -698,7 +931,7 @@ export default function PassportSizePhotoMaker() {
                   </button>
                 </div>
               </div>
-            )}
+            </div>
 
             {passportResult && (
               <div className="sticker-card p-6">
@@ -707,7 +940,7 @@ export default function PassportSizePhotoMaker() {
                     <p className="font-display font-bold text-dark mb-3">Passport Preview</p>
                     <div
                       className="relative mx-auto w-full max-w-[280px] sm:max-w-[320px] rounded-xl overflow-hidden border border-gray-200"
-                      style={{ backgroundColor, aspectRatio: PASSPORT_ASPECT_RATIO }}
+                      style={{ backgroundColor, aspectRatio: `${passportDimensions.width} / ${passportDimensions.height}` }}
                     >
                       <img
                         src={passportResult.previewUrl}
@@ -716,7 +949,7 @@ export default function PassportSizePhotoMaker() {
                       />
                     </div>
                     <p className="text-gray text-sm mt-3 text-center md:text-left">
-                      Size: {PASSPORT_WIDTH} x {PASSPORT_HEIGHT} px (35mm x 45mm ratio)
+                      Size: {passportDimensions.width} x {passportDimensions.height} px
                     </p>
                   </div>
 

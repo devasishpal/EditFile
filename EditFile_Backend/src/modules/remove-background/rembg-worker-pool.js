@@ -20,9 +20,18 @@ const WORKER_READY_TIMEOUT_MS = Number.parseInt(
   10
 );
 const TASK_TIMEOUT_MS = Number.parseInt(process.env.REMOVE_BG_TIMEOUT_MS || '30000', 10);
+const DEPENDENCY_INSTALL_TIMEOUT_MS = Number.parseInt(
+  process.env.REMOVE_BG_INSTALL_TIMEOUT_MS || '900000',
+  10
+);
 const PROCESS_OUTPUT_CAPTURE_LIMIT = 64 * 1024;
 
-const DEPENDENCY_INSTALL_COMMAND = 'pip install rembg pillow onnxruntime';
+const DEPENDENCY_INSTALL_COMMAND = 'python -m pip install rembg pillow onnxruntime';
+const DEPENDENCY_INSTALL_ARGS = ['-m', 'pip', 'install', 'rembg', 'pillow', 'onnxruntime'];
+
+const isAutoInstallRemoveBgEnabled = () => ['1', 'true', 'yes', 'on'].includes(
+  String(process.env.REMOVE_BG_AUTO_INSTALL || 'true').toLowerCase()
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -140,6 +149,28 @@ const ensurePythonDependencies = async (pythonRunner) => {
     pythonRunner.command,
     [...pythonRunner.prefixArgs, '-c', 'import rembg, PIL, onnxruntime'],
     { timeoutMs: DEPENDENCY_CHECK_TIMEOUT_MS }
+  );
+};
+
+const installPythonDependencies = async (pythonRunner) => {
+  logger.warn('remove-background dependencies missing, attempting auto-install via pip');
+
+  try {
+    await runProcess(
+      pythonRunner.command,
+      [...pythonRunner.prefixArgs, '-m', 'pip', '--version'],
+      { timeoutMs: DEPENDENCY_CHECK_TIMEOUT_MS }
+    );
+  } catch (error) {
+    throw new Error(
+      `Python pip is not available for automatic install. Install dependencies manually with: ${DEPENDENCY_INSTALL_COMMAND}`
+    );
+  }
+
+  await runProcess(
+    pythonRunner.command,
+    [...pythonRunner.prefixArgs, ...DEPENDENCY_INSTALL_ARGS],
+    { timeoutMs: DEPENDENCY_INSTALL_TIMEOUT_MS }
   );
 };
 
@@ -384,7 +415,17 @@ export class RembgWorkerPool {
         throw new Error(`Python 3 not found in PATH. Install Python and run: ${DEPENDENCY_INSTALL_COMMAND}`);
       }
 
-      await ensurePythonDependencies(pythonRunner);
+      try {
+        await ensurePythonDependencies(pythonRunner);
+      } catch (dependencyError) {
+        if (!isAutoInstallRemoveBgEnabled()) {
+          throw dependencyError;
+        }
+
+        await installPythonDependencies(pythonRunner);
+        await ensurePythonDependencies(pythonRunner);
+      }
+
       this.pythonRunner = pythonRunner;
 
       this.workers = Array.from({ length: this.workerCount }, (_, index) => ({
