@@ -11,7 +11,7 @@ import {
 } from '@/lib/compressionApi';
 import { runWithConcurrency } from '@/lib/concurrency';
 
-type ConversionStatus = 'ready' | 'processing' | 'completed' | 'error';
+type ConversionStatus = 'ready' | 'uploading' | 'processing' | 'completed' | 'error';
 
 interface PdfToWordFile {
   id: string;
@@ -19,6 +19,7 @@ interface PdfToWordFile {
   name: string;
   size: number;
   status: ConversionStatus;
+  progress: number;
   downloadUrl: string | null;
   outputName: string | null;
   error?: string;
@@ -91,6 +92,7 @@ export default function PDFToWord() {
       name: file.name,
       size: file.size,
       status: 'ready',
+      progress: 0,
       downloadUrl: null,
       outputName: null,
     }));
@@ -194,11 +196,27 @@ export default function PDFToWord() {
       updateFileState(file.id, (target) => ({
         ...target,
         status: 'processing',
+        progress: 0,
         error: undefined,
       }));
 
       try {
-        const queueResult = await queuePdfToWord(file.file, outputFormat);
+        const queueResult = await queuePdfToWord(file.file, outputFormat, (progress) => {
+          updateFileState(file.id, (target) => ({
+            ...target,
+            status: 'uploading',
+            progress,
+            error: undefined,
+          }));
+        });
+
+        updateFileState(file.id, (target) => ({
+          ...target,
+          status: 'processing',
+          progress: 100,
+          error: undefined,
+        }));
+
         await pollJobUntilDone(queueResult.jobId, {
           timeoutMs: 10 * 60 * 1000,
         });
@@ -212,6 +230,7 @@ export default function PDFToWord() {
         updateFileState(file.id, (target) => ({
           ...target,
           status: 'completed',
+          progress: 100,
           downloadUrl: downloadInfo.downloadUrl,
           outputName,
           error: undefined,
@@ -222,6 +241,7 @@ export default function PDFToWord() {
         updateFileState(file.id, (target) => ({
           ...target,
           status: 'error',
+          progress: 0,
           downloadUrl: null,
           outputName: null,
           error: message,
@@ -425,6 +445,15 @@ export default function PDFToWord() {
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </button>
+                      ) : file.status === 'uploading' ? (
+                        <div className="w-24">
+                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-violet transition-all duration-300"
+                              style={{ width: `${file.progress}%` }}
+                            />
+                          </div>
+                        </div>
                       ) : file.status === 'processing' ? (
                         <div className="flex items-center gap-2 text-violet">
                           <Loader2 className="w-5 h-5 animate-spin" />

@@ -204,6 +204,15 @@ export const imageTools: Tool[] = [
     new: true,
   },
   {
+    id: 'passport-photo-maker',
+    name: 'Passport Size Photo Maker',
+    description: 'Create 413 x 531 passport photo with editable background',
+    icon: 'Wand2',
+    category: 'image',
+    href: '/tools/passport-photo-maker',
+    new: true,
+  },
+  {
     id: 'image-watermark',
     name: 'Image Watermark',
     description: 'Add watermark to images',

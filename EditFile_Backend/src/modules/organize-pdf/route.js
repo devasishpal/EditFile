@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { unlockPdf } from './controller.js';
+import { inspectPdf, organizePdf } from './controller.js';
 import { validateFileType, ALLOWED_PDF_TYPES } from '../../middleware/validation.middleware.js';
 
 const router = express.Router();
@@ -13,14 +13,25 @@ const upload = multer({
 });
 
 /**
- * POST /api/unlock-pdf
- * Remove password protection from PDF
+ * POST /api/organize-pdf/inspect
+ * Return PDF page metadata for organize UI.
+ */
+router.post(
+  '/inspect',
+  upload.single('file'),
+  validateFileType(ALLOWED_PDF_TYPES),
+  inspectPdf
+);
+
+/**
+ * POST /api/organize-pdf
+ * Apply page order/deletion/rotation and export organized PDF.
  */
 router.post(
   '/',
   upload.single('file'),
   validateFileType(ALLOWED_PDF_TYPES),
-  unlockPdf
+  organizePdf
 );
 
 export default router;

@@ -1,42 +1,62 @@
-import { PDFDocument } from 'pdf-lib';
+import fs from 'fs/promises';
+import path from 'path';
 import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
+import { ensurePdftkDependency, runCliCommand } from '../../utils/pdf-cli.js';
+import { createTempWorkspace, removePathSafe } from '../../utils/workspace.js';
+
+const UNLOCK_TIMEOUT_MS = Number.parseInt(
+  process.env.UNLOCK_PDF_TIMEOUT_MS || '600000',
+  10
+);
 
 export const processUnlockPdf = async (jobData) => {
   const { jobId, fileUrl, password } = jobData;
-  
+  let tempDir = null;
+
   logger.info(`Starting PDF unlock: ${jobId}`);
-  
+
   try {
     await updateJobStatus(jobId, 'processing');
-    
-    // Download PDF
-    const pdfBuffer = await downloadFile(fileUrl);
-    
-    // Try to load with password
-    let pdf;
-    try {
-      pdf = await PDFDocument.load(pdfBuffer, {
-        password,
-      });
-    } catch (error) {
-      throw new Error('Invalid password or PDF is not encrypted');
+
+    if (!password || typeof password !== 'string') {
+      throw new Error('Password is required to unlock the PDF.');
     }
-    
-    // Save without password
-    const unlockedBytes = await pdf.save({
-      password: undefined, // Remove password
-    });
-    
-    const unlockedBuffer = Buffer.from(unlockedBytes);
-    
-    // Upload
+
+    const { pdftkPath } = await ensurePdftkDependency();
+    if (!pdftkPath) {
+      throw new Error('PDFtk is not available to unlock PDF files.');
+    }
+
+    tempDir = await createTempWorkspace('editfile-unlock-');
+    const inputPath = path.join(tempDir, 'input.pdf');
+    const outputPath = path.join(tempDir, 'unlocked.pdf');
+
+    const pdfBuffer = await downloadFile(fileUrl);
+    await fs.writeFile(inputPath, pdfBuffer);
+
+    await runCliCommand(
+      pdftkPath,
+      [inputPath, 'input_pw', password, 'output', outputPath],
+      { timeoutMs: UNLOCK_TIMEOUT_MS }
+    );
+
+    const unlockedBuffer = await fs.readFile(outputPath);
+    if (!unlockedBuffer || unlockedBuffer.length === 0) {
+      throw new Error('Unlocked PDF generation failed.');
+    }
+
+    const outputFileName = 'unlocked.pdf';
     const outputKey = generateS3Key(jobId, 'unlocked.pdf', 'output');
     const outputUrl = await uploadFile(unlockedBuffer, outputKey, 'application/pdf');
-    
-    // Complete job
+
     await completeJob(jobId, outputUrl, unlockedBuffer.length);
+    await updateJobStatus(jobId, 'completed', {
+      metadata: {
+        outputFileName,
+      },
+    });
     
     logger.info(`PDF unlock completed: ${jobId}`);
     
@@ -49,8 +69,20 @@ export const processUnlockPdf = async (jobData) => {
     
   } catch (error) {
     logger.error(`PDF unlock failed for job ${jobId}:`, error);
-    await failJob(jobId, error.message);
+    const normalizedMessage = String(error?.message || '');
+    const wrongPassword = normalizedMessage.toLowerCase().includes('owner password')
+      || normalizedMessage.toLowerCase().includes('incorrect password')
+      || normalizedMessage.toLowerCase().includes('invalid password')
+      || normalizedMessage.toLowerCase().includes('encryption dictionary');
+    await failJob(
+      jobId,
+      wrongPassword ? 'Invalid password or unsupported encrypted PDF.' : normalizedMessage
+    );
     throw error;
+  } finally {
+    if (tempDir) {
+      await removePathSafe(tempDir);
+    }
   }
 };
 

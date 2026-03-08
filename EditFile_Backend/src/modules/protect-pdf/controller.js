@@ -19,7 +19,7 @@ export const protectPdf = asyncHandler(async (req, res) => {
   const permissions = {
     printing: req.body.printing !== 'false',
     copying: req.body.copying === 'true',
-    modifying: req.body.modifying === 'true',
+    modifying: req.body.modifying === 'true' || req.body.editing === 'true',
   };
   
   const file = req.file;

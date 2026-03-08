@@ -13,6 +13,8 @@ import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
 import { processOcrPdf } from '../modules/ocr-pdf/service.js';
+import { processRepairPdf } from '../modules/repair-pdf/service.js';
+import { processOrganizePdf } from '../modules/organize-pdf/service.js';
 import { processImageCompress } from '../modules/image-compress/service.js';
 import { processImageResize } from '../modules/image-resize/service.js';
 import { processImageConvert } from '../modules/image-convert/service.js';
@@ -55,6 +57,8 @@ const localProcessors = {
   protectPdf: processProtectPdf,
   unlockPdf: processUnlockPdf,
   ocrPdf: processOcrPdf,
+  repairPdf: processRepairPdf,
+  organizePdf: processOrganizePdf,
   imageCompress: processImageCompress,
   imageResize: processImageResize,
   imageConvert: processImageConvert,
@@ -124,6 +128,8 @@ export const queues = {
   protectPdf: createQueue('protect-pdf'),
   unlockPdf: createQueue('unlock-pdf'),
   ocrPdf: createQueue('ocr-pdf'),
+  repairPdf: createQueue('repair-pdf'),
+  organizePdf: createQueue('organize-pdf'),
   imageCompress: createQueue('image-compress'),
   imageResize: createQueue('image-resize'),
   imageConvert: createQueue('image-convert'),

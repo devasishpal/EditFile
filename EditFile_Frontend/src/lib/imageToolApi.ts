@@ -174,6 +174,13 @@ export const removeImageBackground = async (file: File, fuzz = 20) => {
   return requestProcessedFile('/api/remove-background', formData, `${file.name}-transparent.png`);
 };
 
+export const convertToPassportPhotoFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return requestProcessedFile('/api/passport-photo', formData, `${file.name}-passport.png`);
+};
+
 export const downloadProcessedAsset = (asset: ProcessedAsset) => {
   const downloadUrl = URL.createObjectURL(asset.blob);
   const anchor = document.createElement('a');

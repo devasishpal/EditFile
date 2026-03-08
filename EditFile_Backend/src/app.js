@@ -23,6 +23,8 @@ import pdfToJpgRoutes from './modules/pdf-to-jpg/route.js';
 import jpgToPdfRoutes from './modules/jpg-to-pdf/route.js';
 import protectPdfRoutes from './modules/protect-pdf/route.js';
 import unlockPdfRoutes from './modules/unlock-pdf/route.js';
+import repairPdfRoutes from './modules/repair-pdf/route.js';
+import organizePdfRoutes from './modules/organize-pdf/route.js';
 import ocrPdfRoutes from './modules/ocr-pdf/route.js';
 import imageCompressRoutes from './modules/image-compress/route.js';
 import imageResizeRoutes from './modules/image-resize/route.js';
@@ -32,6 +34,7 @@ import imageCropRoutes from './modules/image-crop/route.js';
 import imageWatermarkRoutes from './modules/image-watermark/route.js';
 import imageThumbnailRoutes from './modules/image-thumbnail/route.js';
 import removeBackgroundRoutes from './modules/remove-background/route.js';
+import passportPhotoRoutes from './modules/passport-photo/route.js';
 import directImageRoutes from './modules/direct-image/route.js';
 import pdfEditRoutes from './modules/pdf-edit/route.js';
 import jobStatusRoutes from './modules/job-status/route.js';
@@ -48,12 +51,26 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const frontendOrigin = process.env.FRONTEND_URL || '*';
+const configuredFrontendOrigins = (process.env.FRONTEND_URL || '*')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowAnyOrigin = isLocalMode || configuredFrontendOrigins.includes('*');
+const corsOrigin = allowAnyOrigin
+  ? true
+  : (origin, callback) => {
+      if (!origin || configuredFrontendOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    };
+
 app.use(cors({
-  origin: frontendOrigin === '*' ? true : frontendOrigin,
-  methods: ['GET', 'POST', 'DELETE'],
+  origin: corsOrigin,
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: frontendOrigin !== '*',
+  credentials: !allowAnyOrigin,
 }));
 
 // Body parsing
@@ -106,6 +123,8 @@ app.use('/api/pdf-to-jpg', pdfToJpgRoutes);
 app.use('/api/jpg-to-pdf', jpgToPdfRoutes);
 app.use('/api/protect-pdf', protectPdfRoutes);
 app.use('/api/unlock-pdf', unlockPdfRoutes);
+app.use('/api/repair-pdf', repairPdfRoutes);
+app.use('/api/organize-pdf', organizePdfRoutes);
 app.use('/api/ocr-pdf', ocrPdfRoutes);
 app.use('/api/image-compress', imageCompressRoutes);
 app.use('/api/image-resize', imageResizeRoutes);
@@ -115,6 +134,7 @@ app.use('/api/image-crop', imageCropRoutes);
 app.use('/api/image-watermark', imageWatermarkRoutes);
 app.use('/api/image-thumbnail', imageThumbnailRoutes);
 app.use('/api/remove-background', removeBackgroundRoutes);
+app.use('/api/passport-photo', passportPhotoRoutes);
 app.use('/api', jobStatusRoutes);
 
 // Error handling

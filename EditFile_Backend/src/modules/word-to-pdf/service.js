@@ -1,37 +1,33 @@
-import { PDFDocument } from 'pdf-lib';
 import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
+import { convertWithLibreOffice } from '../../utils/libreoffice.js';
 
 export const processWordToPdf = async (jobData) => {
-  const { jobId, fileUrl } = jobData;
+  const { jobId, fileUrl, originalName = 'document.docx' } = jobData;
   
   logger.info(`Starting Word to PDF: ${jobId}`);
   
   try {
     await updateJobStatus(jobId, 'processing');
     
-    // Download Word document
     const docBuffer = await downloadFile(fileUrl);
-    
-    // In production, use LibreOffice or similar to convert DOCX to PDF
-    // For now, create a placeholder PDF
-    
-    const pdf = await PDFDocument.create();
-    const page = pdf.addPage();
-    
-    // Add placeholder text
-    // Note: In production, you'd extract content from the Word doc
-    
-    const pdfBytes = await pdf.save();
-    const pdfBuffer = Buffer.from(pdfBytes);
-    
-    // Upload
-    const outputKey = generateS3Key(jobId, 'converted.pdf', 'output');
+    const pdfBuffer = await convertWithLibreOffice(docBuffer, originalName, 'pdf');
+
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      throw new Error('Word to PDF conversion produced an empty file.');
+    }
+
+    const outputFileName = 'converted.pdf';
+    const outputKey = generateS3Key(jobId, outputFileName, 'output');
     const outputUrl = await uploadFile(pdfBuffer, outputKey, 'application/pdf');
     
-    // Complete job
     await completeJob(jobId, outputUrl, pdfBuffer.length);
+    await updateJobStatus(jobId, 'completed', {
+      metadata: {
+        outputFileName,
+      },
+    });
     
     logger.info(`Word to PDF completed: ${jobId}`);
     

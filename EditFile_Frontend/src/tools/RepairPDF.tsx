@@ -1,14 +1,14 @@
 import { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, FileText, Download, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Upload, X, FileText, Download, Loader2, AlertCircle, Wrench } from 'lucide-react';
 import {
-  queueProtectPdf,
+  queueRepairPdf,
   pollJobUntilDone,
   getJobDownloadInfo,
   startFileDownload,
 } from '@/lib/compressionApi';
 
-interface ProtectFile {
+interface RepairFile {
   id: string;
   file: File;
   name: string;
@@ -25,21 +25,12 @@ const createFileId = () => Math.random().toString(36).slice(2, 11);
 const isPdfFile = (file: File) =>
   file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
-export default function ProtectPDF() {
-  const [fileItem, setFileItem] = useState<ProtectFile | null>(null);
+export default function RepairPDF() {
+  const [fileItem, setFileItem] = useState<RepairFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
-
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [permissions, setPermissions] = useState({
-    printing: true,
-    copying: false,
-    editing: false,
-  });
 
   const handleFiles = useCallback((incomingFiles: File[]) => {
     if (incomingFiles.length === 0) {
@@ -101,16 +92,6 @@ export default function ProtectPDF() {
       return;
     }
 
-    if (!password.trim()) {
-      setRequestError('Password is required.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setRequestError('Passwords do not match.');
-      return;
-    }
-
     setIsRunning(true);
     setRequestError(null);
     setRequestSuccess(null);
@@ -129,26 +110,17 @@ export default function ProtectPDF() {
     );
 
     try {
-      const queueResult = await queueProtectPdf(
-        fileItem.file,
-        {
-          password,
-          printing: permissions.printing,
-          copying: permissions.copying,
-          editing: permissions.editing,
-        },
-        (progress) => {
-          setFileItem((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  status: 'uploading',
-                  progress,
-                }
-              : prev
-          );
-        }
-      );
+      const queueResult = await queueRepairPdf(fileItem.file, (progress) => {
+        setFileItem((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: 'uploading',
+                progress,
+              }
+            : prev
+        );
+      });
 
       setFileItem((prev) =>
         prev
@@ -171,14 +143,14 @@ export default function ProtectPDF() {
               ...prev,
               status: 'completed',
               downloadUrl: downloadInfo.downloadUrl,
-              outputName: downloadInfo.fileName || 'protected.pdf',
+              outputName: downloadInfo.fileName || 'repaired.pdf',
               error: undefined,
             }
           : prev
       );
-      setRequestSuccess('PDF protected successfully.');
+      setRequestSuccess('Repair completed. Download your repaired PDF.');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to protect PDF.';
+      const message = error instanceof Error ? error.message : 'Repair failed.';
       setFileItem((prev) =>
         prev
           ? {
@@ -201,7 +173,7 @@ export default function ProtectPDF() {
     }
 
     if (fileItem.downloadUrl) {
-      startFileDownload(fileItem.downloadUrl, fileItem.outputName || 'protected.pdf');
+      startFileDownload(fileItem.downloadUrl, fileItem.outputName || 'repaired.pdf');
       return;
     }
 
@@ -242,7 +214,7 @@ export default function ProtectPDF() {
                 <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-violet" />
               </div>
               <h3 className="font-display font-bold text-xl sm:text-2xl text-dark text-center mb-2">
-                Drop PDF file here
+                Drop damaged PDF file here
               </h3>
               <p className="text-gray text-center mb-6">or click to browse from your computer</p>
               <label className="sticker-button cursor-pointer">
@@ -267,91 +239,6 @@ export default function ProtectPDF() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-4"
             >
-              <div className="sticker-card p-6 space-y-4">
-                <div>
-                  <label className="font-display font-bold text-dark block mb-2">Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
-                      className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
-                    />
-                    <button
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-violet"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="font-display font-bold text-dark block mb-2">
-                    Confirm Password
-                  </label>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-violet focus:outline-none"
-                  />
-                </div>
-
-                {password && confirmPassword && password !== confirmPassword && (
-                  <p className="text-red-500 text-sm">Passwords do not match</p>
-                )}
-
-                <div>
-                  <label className="font-display font-bold text-dark block mb-3">Permissions</label>
-                  <div className="space-y-2">
-                    {[
-                      { key: 'printing', label: 'Allow printing' },
-                      { key: 'copying', label: 'Allow copying text/images' },
-                      { key: 'editing', label: 'Allow editing' },
-                    ].map((perm) => (
-                      <label
-                        key={perm.key}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={permissions[perm.key as keyof typeof permissions]}
-                          onChange={(e) =>
-                            setPermissions((prev) => ({
-                              ...prev,
-                              [perm.key]: e.target.checked,
-                            }))
-                          }
-                          className="w-5 h-5 accent-violet"
-                        />
-                        <span className="text-dark">{perm.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {(requestError || requestSuccess) && (
-                <div className="sticker-card p-4">
-                  {requestError && (
-                    <p className="text-red-500 text-sm flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4" />
-                      {requestError}
-                    </p>
-                  )}
-                  {!requestError && requestSuccess && (
-                    <p className="text-green-600 text-sm">{requestSuccess}</p>
-                  )}
-                </div>
-              )}
-
               <div className="sticker-card p-5">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="w-12 h-12 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -376,7 +263,7 @@ export default function ProtectPDF() {
                     {fileItem.status === 'processing' && (
                       <div className="flex items-center gap-2 text-violet">
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-sm">Processing...</span>
+                        <span className="text-sm">Repairing...</span>
                       </div>
                     )}
                     {fileItem.status === 'completed' && (
@@ -395,6 +282,27 @@ export default function ProtectPDF() {
                   </div>
                 </div>
               </div>
+
+              <div className="sticker-card p-4 bg-violet/5">
+                <p className="text-sm text-dark flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-violet" />
+                  We will scan and rebuild the PDF structure to recover a usable file when possible.
+                </p>
+              </div>
+
+              {(requestError || requestSuccess) && (
+                <div className="sticker-card p-4">
+                  {requestError && (
+                    <p className="text-red-500 text-sm flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      {requestError}
+                    </p>
+                  )}
+                  {!requestError && requestSuccess && (
+                    <p className="text-green-600 text-sm">{requestSuccess}</p>
+                  )}
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <label className="sticker-button-secondary cursor-pointer">
@@ -419,7 +327,7 @@ export default function ProtectPDF() {
                   ) : (
                     <Download className="w-4 h-4 mr-2" />
                   )}
-                  {fileItem.downloadUrl ? 'Download' : isRunning ? 'Processing...' : 'Protect PDF'}
+                  {fileItem.downloadUrl ? 'Download' : isRunning ? 'Processing...' : 'Repair PDF'}
                 </button>
               </div>
             </motion.div>

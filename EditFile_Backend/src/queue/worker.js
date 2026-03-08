@@ -15,6 +15,8 @@ import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
 import { processOcrPdf } from '../modules/ocr-pdf/service.js';
+import { processRepairPdf } from '../modules/repair-pdf/service.js';
+import { processOrganizePdf } from '../modules/organize-pdf/service.js';
 import { processImageCompress } from '../modules/image-compress/service.js';
 import { processImageResize } from '../modules/image-resize/service.js';
 import { processImageConvert } from '../modules/image-convert/service.js';
@@ -97,6 +99,8 @@ const workers = {
   protectPdf: createWorker('protect-pdf', processProtectPdf),
   unlockPdf: createWorker('unlock-pdf', processUnlockPdf),
   ocrPdf: createWorker('ocr-pdf', processOcrPdf),
+  repairPdf: createWorker('repair-pdf', processRepairPdf),
+  organizePdf: createWorker('organize-pdf', processOrganizePdf),
   imageCompress: createWorker('image-compress', processImageCompress),
   imageResize: createWorker('image-resize', processImageResize),
   imageConvert: createWorker('image-convert', processImageConvert),

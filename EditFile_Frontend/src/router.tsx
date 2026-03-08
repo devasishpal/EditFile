@@ -13,7 +13,9 @@ import RotatePDF from '@/tools/RotatePDF';
 import DeletePDFPages from '@/tools/DeletePDFPages';
 import AddPageNumbers from '@/tools/AddPageNumbers';
 import ProtectPDF from '@/tools/ProtectPDF';
+import UnlockPDF from '@/tools/UnlockPDF';
 import OCRPDF from '@/tools/OCRPDF';
+import RepairPDF from '@/tools/RepairPDF';
 import OrganizePDF from '@/tools/OrganizePDF';
 import CompressJPEG from '@/tools/CompressJPEG';
 import ResizeImage from '@/tools/ResizeImage';
@@ -23,6 +25,7 @@ import ConvertImage from '@/tools/ConvertImage';
 import ImageToPDF from '@/tools/ImageToPDF';
 import RemoveBackground from '@/tools/RemoveBackground';
 import ImageWatermark from '@/tools/ImageWatermark';
+import PassportSizePhotoMaker from '@/tools/PassportSizePhotoMaker';
 import PdfToolsPage from '@/pages/PdfToolsPage';
 import JpegToolsPage from '@/pages/JpegToolsPage';
 import AboutPage from '@/pages/AboutPage';
@@ -275,6 +278,18 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'unlock-pdf',
+        element: (
+          <ToolLayout
+            toolName="Unlock PDF"
+            toolDescription="Remove password from protected PDFs"
+            icon="Unlock"
+          >
+            <UnlockPDF />
+          </ToolLayout>
+        ),
+      },
+      {
         path: 'ocr-pdf',
         element: (
           <ToolLayout
@@ -283,6 +298,18 @@ export const router = createBrowserRouter([
             icon="ScanText"
           >
             <OCRPDF />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'repair-pdf',
+        element: (
+          <ToolLayout
+            toolName="Repair PDF"
+            toolDescription="Fix corrupted PDF files"
+            icon="Wrench"
+          >
+            <RepairPDF />
           </ToolLayout>
         ),
       },
@@ -383,6 +410,18 @@ export const router = createBrowserRouter([
             icon="Wand2"
           >
             <RemoveBackground />
+          </ToolLayout>
+        ),
+      },
+      {
+        path: 'passport-photo-maker',
+        element: (
+          <ToolLayout
+            toolName="Passport Size Photo Maker"
+            toolDescription="Crop, remove background, and export passport-size photo"
+            icon="Wand2"
+          >
+            <PassportSizePhotoMaker />
           </ToolLayout>
         ),
       },

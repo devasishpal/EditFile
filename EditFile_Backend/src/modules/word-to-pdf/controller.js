@@ -37,6 +37,7 @@ export const wordToPdf = asyncHandler(async (req, res) => {
     await addJob('wordToPdf', {
       jobId: job.id,
       fileUrl,
+      originalName: file.originalname,
     });
 
     const duration = Date.now() - startTime;

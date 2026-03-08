@@ -1,48 +1,68 @@
-import { PDFDocument } from 'pdf-lib';
 import { uploadFile, generateS3Key, downloadFile } from '../../config/s3.js';
 import { updateJobStatus, completeJob, failJob } from '../../services/database.service.js';
 import { logger } from '../../utils/logger.js';
+import { convertWithLibreOffice } from '../../utils/libreoffice.js';
+
+const ALLOWED_OUTPUT_FORMATS = new Set(['docx', 'doc', 'rtf']);
+
+const getContentTypeForFormat = (format) => {
+  if (format === 'doc') {
+    return 'application/msword';
+  }
+
+  if (format === 'rtf') {
+    return 'application/rtf';
+  }
+
+  return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+};
 
 export const processPdfToWord = async (jobData) => {
   const { jobId, fileUrl, outputFormat } = jobData;
-  
+  const normalizedFormat = String(outputFormat || 'docx').toLowerCase();
+
   logger.info(`Starting PDF to Word: ${jobId}`);
-  
+
   try {
     await updateJobStatus(jobId, 'processing');
-    
-    // Download PDF
-    const pdfBuffer = await downloadFile(fileUrl);
-    const pdf = await PDFDocument.load(pdfBuffer);
-    
-    // Extract text from all pages
-    let textContent = '';
-    const pages = pdf.getPages();
-    
-    for (let i = 0; i < pages.length; i++) {
-      textContent += `\n--- Page ${i + 1} ---\n`;
-      // Note: pdf-lib doesn't support text extraction
-      // In production, use pdf-parse or similar library
-      textContent += '[Text content would be extracted here]\n';
+
+    if (!ALLOWED_OUTPUT_FORMATS.has(normalizedFormat)) {
+      throw new Error('Unsupported output format. Use docx, doc, or rtf.');
     }
-    
-    // For now, create a simple text file
-    // In production, use a library like pdf2docx or LibreOffice
-    const outputBuffer = Buffer.from(textContent, 'utf-8');
-    
-    // Upload
-    const outputKey = generateS3Key(jobId, 'converted.docx', 'output');
-    const outputUrl = await uploadFile(outputBuffer, outputKey, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    
-    // Complete job
+
+    const pdfBuffer = await downloadFile(fileUrl);
+    const outputBuffer = await convertWithLibreOffice(
+      pdfBuffer,
+      'source.pdf',
+      normalizedFormat
+    );
+
+    if (!outputBuffer || outputBuffer.length === 0) {
+      throw new Error('PDF to Word conversion produced an empty file.');
+    }
+
+    const outputFileName = `converted.${normalizedFormat}`;
+    const outputKey = generateS3Key(jobId, outputFileName, 'output');
+    const outputUrl = await uploadFile(
+      outputBuffer,
+      outputKey,
+      getContentTypeForFormat(normalizedFormat)
+    );
+
     await completeJob(jobId, outputUrl, outputBuffer.length);
+    await updateJobStatus(jobId, 'completed', {
+      metadata: {
+        outputFormat: normalizedFormat,
+        outputFileName,
+      },
+    });
     
     logger.info(`PDF to Word completed: ${jobId}`);
     
     return {
       success: true,
       jobId,
-      pageCount: pages.length,
+      outputFormat: normalizedFormat,
       outputSize: outputBuffer.length,
       outputUrl,
     };

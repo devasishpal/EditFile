@@ -10,6 +10,13 @@ interface QueuedJobResponse {
 export type SplitMethod = 'range' | 'every' | 'extract';
 export type PdfToWordOutputFormat = 'docx' | 'doc' | 'rtf';
 export type OcrOutputFormat = 'searchable-pdf' | 'text' | 'word';
+export type UploadProgressHandler = (progress: number) => void;
+export type OrganizePdfRotation = 0 | 90 | 180 | 270;
+
+export interface OrganizePdfPageOperation {
+  sourceIndex: number;
+  rotation: OrganizePdfRotation;
+}
 
 interface JobStatusResponse {
   success: boolean;
@@ -48,6 +55,66 @@ const requestJson = async <T>(path: string, init?: RequestInit): Promise<T> => {
   return response.json() as Promise<T>;
 };
 
+const requestJsonWithUploadProgress = <T>(
+  path: string,
+  formData: FormData,
+  onUploadProgress?: UploadProgressHandler
+): Promise<T> =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}${path}`);
+
+    xhr.upload.onprogress = (event) => {
+      if (!onUploadProgress) {
+        return;
+      }
+
+      if (!event.lengthComputable) {
+        return;
+      }
+
+      const progress = Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100)));
+      onUploadProgress(progress);
+    };
+
+    xhr.onerror = () => {
+      reject(new Error('Network request failed'));
+    };
+
+    xhr.onload = () => {
+      let payload: unknown = null;
+      try {
+        payload = JSON.parse(xhr.responseText || '{}');
+      } catch {
+        payload = null;
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        if (onUploadProgress) {
+          onUploadProgress(100);
+        }
+        resolve(payload as T);
+        return;
+      }
+
+      const rawErrorMessage =
+        (payload &&
+          typeof payload === 'object' &&
+          (payload as { error?: string; message?: string }).error) ||
+        (payload &&
+          typeof payload === 'object' &&
+          (payload as { error?: string; message?: string }).message) ||
+        'Request failed';
+      const errorMessage =
+        typeof rawErrorMessage === 'string' && rawErrorMessage.trim()
+          ? rawErrorMessage
+          : 'Request failed';
+      reject(new Error(errorMessage));
+    };
+
+    xhr.send(formData);
+  });
+
 export const queuePdfCompression = async (file: File, targetSizeKB: number) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -61,13 +128,167 @@ export const queuePdfCompression = async (file: File, targetSizeKB: number) => {
 
 export const queuePdfToWord = async (
   file: File,
-  outputFormat: PdfToWordOutputFormat = 'docx'
+  outputFormat: PdfToWordOutputFormat = 'docx',
+  onUploadProgress?: UploadProgressHandler
 ) => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('format', outputFormat);
 
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/pdf-to-word',
+      formData,
+      onUploadProgress
+    );
+  }
+
   return requestJson<QueuedJobResponse>('/api/pdf-to-word', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueWordToPdf = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/word-to-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/word-to-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueProtectPdf = async (
+  file: File,
+  options: {
+    password: string;
+    printing: boolean;
+    copying: boolean;
+    editing: boolean;
+  },
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('password', options.password);
+  formData.append('printing', String(options.printing));
+  formData.append('copying', String(options.copying));
+  formData.append('editing', String(options.editing));
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/protect-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/protect-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueUnlockPdf = async (
+  file: File,
+  password: string,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('password', password);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/unlock-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/unlock-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueRepairPdf = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/repair-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/repair-pdf', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+interface OrganizePdfInspectResponse {
+  success: boolean;
+  pageCount: number;
+}
+
+export const inspectOrganizePdf = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<OrganizePdfInspectResponse>(
+      '/api/organize-pdf/inspect',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<OrganizePdfInspectResponse>('/api/organize-pdf/inspect', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queueOrganizePdf = async (
+  file: File,
+  pages: OrganizePdfPageOperation[],
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('pages', JSON.stringify(pages));
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/organize-pdf',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/organize-pdf', {
     method: 'POST',
     body: formData,
   });
@@ -198,11 +419,11 @@ export const pollJobUntilDone = async (
     }
 
     if (result.job.status === 'failed') {
-      throw new Error(result.job.errorMessage || 'Compression failed');
+      throw new Error(result.job.errorMessage || 'Processing failed');
     }
 
     if (Date.now() - startedAt > timeoutMs) {
-      throw new Error('Compression timed out');
+      throw new Error('Processing timed out');
     }
 
     await new Promise((resolve) => setTimeout(resolve, intervalMs));

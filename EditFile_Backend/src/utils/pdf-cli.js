@@ -15,6 +15,7 @@ const WINDOWS_GS_ROOTS = ['C:\\Program Files\\gs', 'C:\\Program Files (x86)\\gs'
 
 let ensureDependenciesPromise = null;
 let ensureGhostscriptPromise = null;
+let ensurePdftkPromise = null;
 
 const normalizeCandidate = (value) => String(value || '').trim();
 
@@ -219,6 +220,23 @@ const detectGhostscriptDependency = async () => {
   return { ghostscriptPath };
 };
 
+const detectPdftkDependency = async () => {
+  const pdftkCandidates = [];
+
+  if (process.env.PDFTK_PATH) {
+    pdftkCandidates.push(process.env.PDFTK_PATH);
+  }
+
+  if (process.platform === 'win32') {
+    pdftkCandidates.push(...(await getWindowsPdftkCandidates()));
+  }
+
+  pdftkCandidates.push('pdftk', 'pdftk.exe');
+
+  const pdftkPath = await findBinary(pdftkCandidates, ['--version']);
+  return { pdftkPath };
+};
+
 const installOnDebianFamily = async (missingPackages) => {
   const installArgs = ['install', ...missingPackages, '-y'];
 
@@ -397,4 +415,34 @@ export const ensureGhostscriptDependency = async () => {
   }
 
   return ensureGhostscriptPromise;
+};
+
+export const ensurePdftkDependency = async () => {
+  if (!ensurePdftkPromise) {
+    ensurePdftkPromise = (async () => {
+      let detected = await detectPdftkDependency();
+
+      if (!detected.pdftkPath) {
+        await installMissingDependencies({
+          needsPdftk: true,
+          needsGhostscript: false,
+        });
+        detected = await detectPdftkDependency();
+      }
+
+      if (!detected.pdftkPath) {
+        throw new Error(
+          'PDFtk is required for this operation but was not found. Install PDFtk and ensure it is accessible.'
+        );
+      }
+
+      logger.info(`PDFtk dependency ready: ${detected.pdftkPath}`);
+      return detected;
+    })().catch((error) => {
+      ensurePdftkPromise = null;
+      throw error;
+    });
+  }
+
+  return ensurePdftkPromise;
 };

@@ -64,6 +64,12 @@ interface CategoryToolsPageProps {
   description: string;
   tools: Tool[];
   activeCategory: 'pdf' | 'image';
+  sections?: ToolSection[];
+}
+
+export interface ToolSection {
+  title: string;
+  toolIds: string[];
 }
 
 interface ToolCardProps {
@@ -82,7 +88,7 @@ function ToolCard({ tool, index }: ToolCardProps) {
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.45, delay: index * 0.04 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className="sticker-card p-5 group cursor-pointer transition-all duration-200 hover:shadow-sticker-lg"
+      className="sticker-card h-[160px] sm:h-[170px] p-5 group cursor-pointer transition-all duration-200 hover:shadow-sticker-lg"
     >
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-violet/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-violet/20 transition-colors">
@@ -116,7 +122,20 @@ export default function CategoryToolsPage({
   description,
   tools,
   activeCategory,
+  sections,
 }: CategoryToolsPageProps) {
+  const hasSections = Boolean(sections?.length);
+  const toolById = new Map(tools.map((tool) => [tool.id, tool]));
+  const categorizedSections =
+    sections?.map((section) => ({
+      title: section.title,
+      tools: section.toolIds
+        .map((toolId) => toolById.get(toolId))
+        .filter((tool): tool is Tool => Boolean(tool)),
+    })) ?? [];
+
+  let animationIndex = 0;
+
   return (
     <div className="min-h-screen w-full max-w-full bg-violet relative overflow-x-clip">
       <div className="grain-overlay" />
@@ -173,11 +192,29 @@ export default function CategoryToolsPage({
             <p className="text-white/70 text-base sm:text-lg mt-4 max-w-3xl">{description}</p>
           </motion.div>
 
-          <div className="tool-cards-grid">
-            {tools.map((tool, index) => (
-              <ToolCard key={tool.id} tool={tool} index={index} />
-            ))}
-          </div>
+          {hasSections ? (
+            <div className="space-y-10">
+              {categorizedSections.map((section) => (
+                <section key={section.title}>
+                  <h2 className="font-display font-bold text-2xl sm:text-3xl text-white uppercase tracking-tight mb-5">
+                    {section.title}
+                  </h2>
+                  <div className="tool-cards-grid">
+                    {section.tools.map((tool) => {
+                      const cardIndex = animationIndex++;
+                      return <ToolCard key={tool.id} tool={tool} index={cardIndex} />;
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="tool-cards-grid">
+              {tools.map((tool, index) => (
+                <ToolCard key={tool.id} tool={tool} index={index} />
+              ))}
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
