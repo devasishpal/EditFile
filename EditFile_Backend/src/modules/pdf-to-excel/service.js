@@ -10,6 +10,68 @@ import { buildFileName } from '../../utils/file-name.js';
 
 const ALLOWED_OUTPUT_FORMATS = new Set(['xlsx', 'xls']);
 
+const getErrorMessage = (error) =>
+  error instanceof Error ? error.message : String(error);
+
+const convertPdfToExcelBuffer = async (pdfBuffer, originalName, outputFormat) => {
+  const attemptErrors = [];
+  const attempt = async (label, action) => {
+    try {
+      const result = await action();
+      if (result?.length) {
+        return result;
+      }
+
+      attemptErrors.push(`${label}: empty output`);
+      return null;
+    } catch (error) {
+      const message = getErrorMessage(error);
+      attemptErrors.push(`${label}: ${message}`);
+      logger.warn(`PDF to Excel attempt failed (${label}): ${message}`);
+      return null;
+    }
+  };
+
+  // Hybrid PDFs with embedded spreadsheet streams can work directly via Calc import.
+  const directCalcBuffer = await attempt('direct-calc-stream', () =>
+    convertWithLibreOffice(pdfBuffer, originalName, outputFormat, {
+      inFilter: 'calc_pdf_addstream_import',
+    })
+  );
+  if (directCalcBuffer?.length) {
+    return directCalcBuffer;
+  }
+
+  // Reliable fallback for normal PDFs:
+  // 1) import as Draw and export HTML
+  // 2) import HTML in Calc and export XLSX/XLS
+  const htmlBuffer = await attempt('pdf-to-html', () =>
+    convertWithLibreOffice(pdfBuffer, originalName, 'html')
+  );
+
+  if (htmlBuffer?.length) {
+    const htmlFileName = buildFileName({
+      originalName,
+      extension: 'html',
+      fallbackBase: 'document',
+    });
+
+    const htmlToSpreadsheetBuffer = await attempt(`html-to-${outputFormat}`, () =>
+      convertWithLibreOffice(htmlBuffer, htmlFileName, outputFormat, {
+        inFilter: 'calc_HTML_WebQuery',
+      })
+    );
+
+    if (htmlToSpreadsheetBuffer?.length) {
+      return htmlToSpreadsheetBuffer;
+    }
+  }
+
+  throw new Error(
+    `PDF to Excel conversion failed after all attempts. ${attemptErrors.join(' | ')}`
+  );
+};
+
 export const processPdfToExcel = async (jobData) => {
   const { jobId, fileUrl, outputFormat, originalName = 'source.pdf' } = jobData;
   const normalizedFormat = String(outputFormat || 'xlsx').toLowerCase();
@@ -24,7 +86,7 @@ export const processPdfToExcel = async (jobData) => {
     }
 
     const pdfBuffer = await downloadFile(fileUrl);
-    const outputBuffer = await convertWithLibreOffice(
+    const outputBuffer = await convertPdfToExcelBuffer(
       pdfBuffer,
       originalName,
       normalizedFormat
@@ -65,9 +127,10 @@ export const processPdfToExcel = async (jobData) => {
       outputUrl,
     };
   } catch (error) {
+    const safeMessage = getErrorMessage(error) || CONVERSION_FAILURE_MESSAGE;
     logger.error(`PDF to Excel failed for job ${jobId}:`, error);
-    await failJob(jobId, CONVERSION_FAILURE_MESSAGE);
-    throw new Error(CONVERSION_FAILURE_MESSAGE);
+    await failJob(jobId, safeMessage);
+    throw new Error(safeMessage);
   }
 };
 

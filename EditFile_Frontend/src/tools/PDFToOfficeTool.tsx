@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, FileText, Download, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, FileText, Download, Loader2, AlertCircle } from 'lucide-react';
 import JSZip from 'jszip';
 import {
   pollJobUntilDone,
@@ -150,14 +150,6 @@ export default function PDFToOfficeTool<T extends string>({
     },
     [handleFiles]
   );
-
-  const removeFile = (id: string) => {
-    if (isConverting) {
-      return;
-    }
-
-    setFiles((prev) => prev.filter((file) => file.id !== id));
-  };
 
   const handleSingleDownload = (file: PdfToOfficeFile) => {
     if (!file.downloadUrl) {
@@ -457,13 +449,13 @@ export default function PDFToOfficeTool<T extends string>({
                     </div>
                     <div className="flex items-center gap-2">
                       {file.status === 'completed' ? (
-                        <button
-                          onClick={() => handleSingleDownload(file)}
-                          className="sticker-button py-2 px-4"
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </button>
+                        <span className="text-sm text-green-600 font-medium">
+                          Ready to download
+                        </span>
+                      ) : file.status === 'error' ? (
+                        <span className="text-sm text-red-500 font-medium">
+                          Failed
+                        </span>
                       ) : file.status === 'uploading' ? (
                         <div className="w-24">
                           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -481,14 +473,6 @@ export default function PDFToOfficeTool<T extends string>({
                       ) : (
                         <span className="text-sm text-gray">Waiting</span>
                       )}
-
-                      <button
-                        onClick={() => removeFile(file.id)}
-                        disabled={isConverting}
-                        className="w-10 h-10 bg-gray-100 hover:bg-red-100 disabled:opacity-60 rounded-xl flex items-center justify-center transition-colors"
-                      >
-                        <X className="w-5 h-5 text-gray hover:text-red-500" />
-                      </button>
                     </div>
                   </div>
                 </motion.div>

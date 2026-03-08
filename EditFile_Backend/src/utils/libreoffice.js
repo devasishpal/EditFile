@@ -12,7 +12,9 @@ const DEFAULT_CONVERT_TIMEOUT_MS = Number.parseInt(
 );
 
 const WINDOWS_SOFFICE_DEFAULTS = [
+  'C:\\Program Files\\LibreOffice\\program\\soffice.com',
   'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+  'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.com',
   'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe',
 ];
 
@@ -84,7 +86,7 @@ const detectLibreOfficeBinary = async () => {
   }
 
   if (process.platform === 'win32') {
-    candidates.push(...WINDOWS_SOFFICE_DEFAULTS, 'soffice.exe', 'libreoffice.exe');
+    candidates.push(...WINDOWS_SOFFICE_DEFAULTS, 'soffice.com', 'soffice.exe', 'libreoffice.exe');
   } else {
     candidates.push('soffice', 'libreoffice', '/usr/bin/soffice', '/usr/bin/libreoffice');
   }
@@ -276,25 +278,29 @@ export const convertWithLibreOffice = async (
     await fs.writeFile(inputPath, inputBuffer);
 
     const convertToArg = buildConvertToArgument(normalizedTargetFormat, options.filter);
-    const sofficeBinary = process.env.LIBRE_OFFICE_EXE || 'soffice';
+    const inputFilter = String(options.inFilter || '').trim();
+    const sofficeBinary =
+      process.env.LIBRE_OFFICE_EXE || (process.platform === 'win32' ? 'soffice.com' : 'soffice');
+    const sofficeArgs = [
+      `-env:UserInstallation=${pathToFileURL(profileDir).href}`,
+      '--headless',
+      '--nologo',
+      '--nodefault',
+      '--nofirststartwizard',
+      '--nolockcheck',
+      '--norestore',
+      '--invisible',
+    ];
+
+    if (inputFilter) {
+      sofficeArgs.push(`--infilter=${inputFilter}`);
+    }
+
+    sofficeArgs.push('--convert-to', convertToArg, '--outdir', outputDir, inputPath);
 
     await runCliCommand(
       sofficeBinary,
-      [
-        `-env:UserInstallation=${pathToFileURL(profileDir).href}`,
-        '--headless',
-        '--nologo',
-        '--nodefault',
-        '--nofirststartwizard',
-        '--nolockcheck',
-        '--norestore',
-        '--invisible',
-        '--convert-to',
-        convertToArg,
-        '--outdir',
-        outputDir,
-        inputPath,
-      ],
+      sofficeArgs,
       {
         timeoutMs: options.timeoutMs || DEFAULT_CONVERT_TIMEOUT_MS,
         captureStdout: false,

@@ -27,7 +27,10 @@ export const processPdfToWord = async (jobData) => {
     const outputBuffer = await convertWithLibreOffice(
       pdfBuffer,
       originalName,
-      normalizedFormat
+      normalizedFormat,
+      {
+        inFilter: 'writer_pdf_import',
+      }
     );
 
     if (!outputBuffer || outputBuffer.length === 0) {

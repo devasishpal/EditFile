@@ -27,7 +27,10 @@ export const processPdfToPowerpoint = async (jobData) => {
     const outputBuffer = await convertWithLibreOffice(
       pdfBuffer,
       originalName,
-      normalizedFormat
+      normalizedFormat,
+      {
+        inFilter: 'impress_pdf_import',
+      }
     );
 
     if (!outputBuffer || outputBuffer.length === 0) {
