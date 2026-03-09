@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createJob } from '../../services/database.service.js';
-import { uploadFile, generateS3Key } from '../../config/s3.js';
-import { addJob } from '../../queue/queue.js';
 import { logger } from '../../utils/logger.js';
 import { asyncHandler } from '../../middleware/error.middleware.js';
+import { processPdfToExcel } from './service.js';
 
 const ALLOWED_OUTPUT_FORMATS = new Set(['xlsx', 'xls']);
 
@@ -31,12 +30,8 @@ export const pdfToExcel = asyncHandler(async (req, res) => {
   logger.info(`PDF to Excel request: ${requestId}`);
 
   try {
-    const s3Key = generateS3Key(requestId, file.originalname, 'input');
-    const fileUrl = await uploadFile(file.buffer, s3Key, file.mimetype);
-
     const job = await createJob({
       toolType: 'pdf-to-excel',
-      originalFileUrl: fileUrl,
       originalSize: file.size,
       metadata: {
         outputFormat,
@@ -45,11 +40,15 @@ export const pdfToExcel = asyncHandler(async (req, res) => {
       ipAddress: req.ip,
     });
 
-    await addJob('pdfToExcel', {
-      jobId: job.id,
-      fileUrl,
-      outputFormat,
-      originalName: file.originalname,
+    setImmediate(() => {
+      processPdfToExcel({
+        jobId: job.id,
+        inputBuffer: file.buffer,
+        outputFormat,
+        originalName: file.originalname,
+      }).catch((error) => {
+        logger.error(`PDF to Excel background processing failed for job ${job.id}:`, error);
+      });
     });
 
     const duration = Date.now() - startTime;
@@ -57,7 +56,7 @@ export const pdfToExcel = asyncHandler(async (req, res) => {
 
     res.status(202).json({
       success: true,
-      message: 'PDF to Excel conversion job queued successfully',
+      message: 'PDF to Excel conversion started successfully',
       jobId: job.id,
       status: 'pending',
       outputFormat,

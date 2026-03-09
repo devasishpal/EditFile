@@ -12,6 +12,7 @@ export type PdfToWordOutputFormat = 'docx' | 'doc' | 'rtf';
 export type PdfToExcelOutputFormat = 'xlsx' | 'xls';
 export type PdfToPowerPointOutputFormat = 'pptx' | 'ppt';
 export type OcrOutputFormat = 'searchable-pdf' | 'text' | 'word';
+export type PdfaVersion = 'pdfa-1' | 'pdfa-2' | 'pdfa-3';
 export type UploadProgressHandler = (progress: number) => void;
 export type OrganizePdfRotation = 0 | 90 | 180 | 270;
 
@@ -255,6 +256,29 @@ export const queuePdfToPowerPoint = async (
   }
 
   return requestJson<QueuedJobResponse>('/api/pdf-to-powerpoint', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const queuePdfToPdfA = async (
+  file: File,
+  pdfaVersion: PdfaVersion = 'pdfa-2',
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('pdfaVersion', pdfaVersion);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/pdf-to-pdfa',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/pdf-to-pdfa', {
     method: 'POST',
     body: formData,
   });

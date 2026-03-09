@@ -18,9 +18,13 @@ Production-ready file processing backend for EditFile SaaS platform. Handles PDF
 - **Queue**: BullMQ + Redis
 - **Database**: CockroachDB (PostgreSQL-compatible)
 - **Storage**: S3-compatible (Cloudflare R2 / AWS S3)
+- **Backend Hosting**: Oracle Cloud VM / any Linux VPS
+- **Frontend Hosting**: Vercel
+- **Edge / DNS**: Cloudflare
 - **PDF Processing**: pdf-lib
 - **Image Processing**: sharp
 - **OCR**: tesseract.js
+- **PDF to Excel Tables**: Python Camelot
 
 ## Architecture
 
@@ -162,64 +166,111 @@ npm install
 npm run dev
 ```
 
+### PDF to Excel dependencies
+
+The PDF-to-Excel tool uses Python + Camelot in addition to the Node.js backend.
+
+Install the Python packages with:
+
+```bash
+python -m pip install -r requirements-pdf-to-excel.txt
+```
+
+For best lattice-table detection, install Ghostscript on the host machine as well. The converter also has a `stream` fallback for PDFs where lattice detection is not available.
+
 When `LOCAL_MODE=true`, you do **not** need to run `npm run worker`.
+
+## Recommended Production Stack
+
+- **Frontend**: Vercel
+- **Backend API**: Oracle Cloud VM
+- **Background Worker**: Oracle Cloud VM
+- **Database**: CockroachDB
+- **Queue**: Redis (Upstash recommended)
+- **Object Storage**: Cloudflare R2
+- **DNS / SSL / CDN**: Cloudflare
+
+This backend should run on a VM or container host, not on Vercel Functions. File conversion jobs are long-running and rely on native binaries such as LibreOffice, Ghostscript, ImageMagick, and Python-based tooling.
 
 ### 1. Prerequisites
 
+- Oracle Cloud Ubuntu/Debian VM with SSH access
 - Node.js 20+
-- CockroachDB account
-- Redis (Upstash or Railway)
-- S3-compatible storage (Cloudflare R2 recommended)
+- CockroachDB database
+- Redis instance for BullMQ
+- Cloudflare R2 bucket and API credentials
+- Cloudflare-managed DNS for your API domain (recommended)
+- Process manager such as `pm2` or `systemd`
+- Host packages for full tool coverage:
+  - LibreOffice
+  - Ghostscript
+  - ImageMagick
+  - Python 3 + pip
+  - Tesseract OCR + Poppler utilities for OCR-heavy workflows
 
-### 2. Railway Deployment
+### 2. Create External Services
 
-#### Step 1: Create Railway Project
+1. **CockroachDB**
+   - Create a CockroachDB cluster or serverless database.
+   - Copy the PostgreSQL connection string for `DATABASE_URL`.
+
+2. **Redis**
+   - Create a Redis instance.
+   - Upstash works well for a simple managed setup.
+   - Copy the host, port, password, and TLS requirements.
+
+3. **Cloudflare R2**
+   - Create an R2 bucket.
+   - Generate an access key and secret key.
+   - Keep the account endpoint for `S3_ENDPOINT`.
+
+4. **Vercel**
+   - Deploy the frontend on Vercel.
+   - Point the frontend API base URL to your backend domain on Oracle Cloud.
+
+### 3. Prepare the Oracle Cloud Server
+
+Example for Ubuntu/Debian:
 
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
+sudo apt update
+sudo apt install -y curl git build-essential python3 python3-pip \
+  ghostscript imagemagick libreoffice tesseract-ocr poppler-utils
 
-# Login
-railway login
-
-# Initialize project
-railway init
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo npm install -g pm2
 ```
 
-#### Step 2: Add Services
+Install Python dependencies used by optional tools:
 
-1. **Add CockroachDB**:
-   - Go to Railway dashboard
-   - Click "New" → "Database" → "Add CockroachDB"
-   - Copy the connection string
-
-2. **Add Redis**:
-   - Click "New" → "Database" → "Add Redis"
-   - Or use Upstash Redis for better performance
-
-3. **Add Cloudflare R2**:
-   - Create R2 bucket in Cloudflare dashboard
-   - Generate API tokens
-
-#### Step 3: Configure Environment Variables
-
-In Railway dashboard, add these environment variables:
-
+```bash
+python3 -m pip install -r requirements-pdf-to-excel.txt
+python3 -m pip install rembg pillow onnxruntime
 ```
+
+### 4. Configure Backend Environment Variables
+
+Create `.env` from `.env.example` and set production values:
+
+```env
+LOCAL_MODE=false
 NODE_ENV=production
 PORT=3000
-FRONTEND_URL=https://your-frontend-url.com
+FRONTEND_URL=https://your-app.vercel.app,https://yourdomain.com
+BACKEND_PUBLIC_URL=https://api.yourdomain.com
 
-# Database
-DATABASE_URL=${{Postgres.DATABASE_URL}}
+# CockroachDB
+DATABASE_URL=postgresql://username:password@host:26257/defaultdb?sslmode=require
 
 # Redis
-REDIS_HOST=${{Redis.REDIS_HOST}}
-REDIS_PORT=${{Redis.REDIS_PORT}}
-REDIS_PASSWORD=${{Redis.REDIS_PASSWORD}}
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+REDIS_TLS=true
 
-# S3 (Cloudflare R2)
-S3_ENDPOINT=https://your-account.r2.cloudflarestorage.com
+# Cloudflare R2
+S3_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
 S3_REGION=auto
 S3_BUCKET_NAME=editfile-uploads
 S3_ACCESS_KEY_ID=your-access-key
@@ -230,57 +281,84 @@ S3_FORCE_PATH_STYLE=true
 WORKER_CONCURRENCY=5
 ```
 
-#### Step 4: Deploy
+Important:
+
+- Set `LOCAL_MODE=false` in production.
+- When `LOCAL_MODE=false`, this project expects all three remote services: `DATABASE_URL`, Redis, and S3-compatible storage.
+- Add every Vercel/custom frontend domain you use to `FRONTEND_URL`, separated by commas.
+
+### 5. Deploy the Backend on Oracle Cloud
 
 ```bash
-# Deploy to Railway
-railway up
-
-# View logs
-railway logs
-```
-
-### 3. Alternative: Manual Deployment
-
-```bash
-# Clone repository
 git clone <repo-url>
 cd EditFile_Backend
-
-# Install dependencies
 npm install
 
-# Copy environment file
-cp .env.example .env
+python3 -m pip install -r requirements-pdf-to-excel.txt
+python3 -m pip install rembg pillow onnxruntime
 
-# Edit .env with your credentials
-nano .env
-
-# Start server
-npm start
-
-# Start worker (in separate terminal)
-npm run worker
+pm2 start npm --name editfile-api -- start
+pm2 start npm --name editfile-worker -- run worker
+pm2 save
 ```
+
+Useful PM2 commands:
+
+```bash
+pm2 status
+pm2 logs editfile-api
+pm2 logs editfile-worker
+pm2 restart editfile-api
+pm2 restart editfile-worker
+```
+
+### 6. Connect the Frontend on Vercel
+
+Set the frontend environment variable on Vercel:
+
+```env
+VITE_API_BASE_URL=https://api.yourdomain.com
+```
+
+### 7. Put Cloudflare in Front of the API
+
+- Create a DNS record such as `api.yourdomain.com` pointing to the Oracle VM public IP.
+- Enable SSL/TLS in Cloudflare and terminate HTTPS at your reverse proxy or server.
+- Make sure your reverse proxy and firewall allow the upload sizes required by this app.
+
+### 8. Verify the Deployment
+
+```bash
+curl https://api.yourdomain.com/health
+```
+
+Then test one upload flow from the deployed frontend and confirm:
+
+- the API accepts uploads
+- jobs move from `pending` to `completed`
+- download URLs return the processed file
 
 ## Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
+| `LOCAL_MODE` | Enables in-memory DB/queue/storage mode | No (`false` for production) |
 | `NODE_ENV` | Environment (development/production) | Yes |
 | `PORT` | Server port | No (default: 3000) |
 | `FRONTEND_URL` | Frontend URL for CORS | Yes |
-| `DATABASE_URL` | CockroachDB connection string | Yes |
-| `REDIS_HOST` | Redis host | Yes |
+| `BACKEND_PUBLIC_URL` | Public backend URL used for generated local download links | Recommended |
+| `DATABASE_URL` | CockroachDB connection string | Yes when `LOCAL_MODE=false` |
+| `REDIS_HOST` | Redis host | Yes when `LOCAL_MODE=false` |
 | `REDIS_PORT` | Redis port | No (default: 6379) |
 | `REDIS_PASSWORD` | Redis password | No |
 | `REDIS_TLS` | Use TLS for Redis | No |
-| `S3_ENDPOINT` | S3 endpoint URL | Yes |
-| `S3_REGION` | S3 region | No |
-| `S3_BUCKET_NAME` | S3 bucket name | Yes |
-| `S3_ACCESS_KEY_ID` | S3 access key | Yes |
-| `S3_SECRET_ACCESS_KEY` | S3 secret key | Yes |
+| `S3_ENDPOINT` | S3 endpoint URL | Yes when `LOCAL_MODE=false` |
+| `S3_REGION` | S3 region (`auto` for R2) | No |
+| `S3_BUCKET_NAME` | S3 bucket name | Yes when `LOCAL_MODE=false` |
+| `S3_ACCESS_KEY_ID` | S3 access key | Yes when `LOCAL_MODE=false` |
+| `S3_SECRET_ACCESS_KEY` | S3 secret key | Yes when `LOCAL_MODE=false` |
 | `S3_FORCE_PATH_STYLE` | Force path-style URLs | No |
+| `PYTHON_EXECUTABLE` | Explicit Python binary path if needed | No |
 | `WORKER_CONCURRENCY` | Worker concurrency | No (default: 5) |
 
 ## Database Schema
@@ -334,6 +412,7 @@ Response:
 ```json
 {
   "status": "healthy",
+  "mode": "remote",
   "timestamp": "2024-01-01T00:00:00.000Z",
   "uptime": 3600
 }

@@ -12,6 +12,7 @@ import PDFToExcel from '@/tools/PDFToExcel';
 import PowerPointToPDF from '@/tools/PowerPointToPDF';
 import PDFToPowerPoint from '@/tools/PDFToPowerPoint';
 import PDFToJPG from '@/tools/PDFToJPG';
+import PDFToPDFA from '@/tools/PDFToPDFA';
 import JPGToPDF from '@/tools/JPGToPDF';
 import AddWatermark from '@/tools/AddWatermark';
 import RotatePDF from '@/tools/RotatePDF';
@@ -128,15 +129,6 @@ const pdfToolRoutes = [
     ),
   },
   {
-    path: '/pdf-tools/scan-to-pdf',
-    element: toolPage(
-      'Scan to PDF',
-      'Convert scanned images into a PDF',
-      'ScanText',
-      <JPGToPDF />
-    ),
-  },
-  {
     path: '/pdf-tools/powerpoint-to-pdf',
     element: toolPage(
       'PowerPoint to PDF',
@@ -192,12 +184,7 @@ const pdfToolRoutes = [
       'PDF to PDF/A',
       'Convert PDF files into archival PDF/A format',
       'FileOutput',
-      <ComingSoonTool
-        title="PDF to PDF/A is added"
-        message="The tool page and route are ready. PDF/A conversion processing is pending."
-        suggestedToolHref="/pdf-tools/repair-pdf"
-        suggestedToolLabel="Repair PDF"
-      />
+      <PDFToPDFA />
     ),
   },
   {
@@ -462,7 +449,6 @@ const pdfToolSlugs = [
   'word-to-pdf',
   'pdf-to-jpg',
   'jpg-to-pdf',
-  'scan-to-pdf',
   'powerpoint-to-pdf',
   'excel-to-pdf',
   'html-to-pdf',

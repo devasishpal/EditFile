@@ -15,6 +15,7 @@ import { processPdfToExcel } from '../modules/pdf-to-excel/service.js';
 import { processPowerpointToPdf } from '../modules/powerpoint-to-pdf/service.js';
 import { processPdfToPowerpoint } from '../modules/pdf-to-powerpoint/service.js';
 import { processPdfToJpg } from '../modules/pdf-to-jpg/service.js';
+import { processPdfToPdfA } from '../modules/pdf-to-pdfa/service.js';
 import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
@@ -103,6 +104,7 @@ const workers = {
   powerpointToPdf: createWorker('powerpoint-to-pdf', processPowerpointToPdf),
   pdfToPowerpoint: createWorker('pdf-to-powerpoint', processPdfToPowerpoint),
   pdfToJpg: createWorker('pdf-to-jpg', processPdfToJpg),
+  pdfToPdfA: createWorker('pdf-to-pdfa', processPdfToPdfA),
   jpgToPdf: createWorker('jpg-to-pdf', processJpgToPdf),
   protectPdf: createWorker('protect-pdf', processProtectPdf),
   unlockPdf: createWorker('unlock-pdf', processUnlockPdf),

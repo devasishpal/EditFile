@@ -13,6 +13,7 @@ import { processPdfToExcel } from '../modules/pdf-to-excel/service.js';
 import { processPowerpointToPdf } from '../modules/powerpoint-to-pdf/service.js';
 import { processPdfToPowerpoint } from '../modules/pdf-to-powerpoint/service.js';
 import { processPdfToJpg } from '../modules/pdf-to-jpg/service.js';
+import { processPdfToPdfA } from '../modules/pdf-to-pdfa/service.js';
 import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
@@ -61,6 +62,7 @@ const localProcessors = {
   powerpointToPdf: processPowerpointToPdf,
   pdfToPowerpoint: processPdfToPowerpoint,
   pdfToJpg: processPdfToJpg,
+  pdfToPdfA: processPdfToPdfA,
   jpgToPdf: processJpgToPdf,
   protectPdf: processProtectPdf,
   unlockPdf: processUnlockPdf,
@@ -136,6 +138,7 @@ export const queues = {
   powerpointToPdf: createQueue('powerpoint-to-pdf'),
   pdfToPowerpoint: createQueue('pdf-to-powerpoint'),
   pdfToJpg: createQueue('pdf-to-jpg'),
+  pdfToPdfA: createQueue('pdf-to-pdfa'),
   jpgToPdf: createQueue('jpg-to-pdf'),
   protectPdf: createQueue('protect-pdf'),
   unlockPdf: createQueue('unlock-pdf'),

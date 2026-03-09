@@ -4,7 +4,7 @@ import { availablePdfTools } from '@/lib/data';
 const pdfToolSections: ToolSection[] = [
   {
     title: 'ORGANIZE PDF',
-    toolIds: ['merge-pdf', 'split-pdf', 'delete-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
+    toolIds: ['merge-pdf', 'split-pdf', 'delete-pages', 'extract-pages', 'organize-pdf'],
   },
   {
     title: 'OPTIMIZE PDF',

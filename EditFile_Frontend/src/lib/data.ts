@@ -143,14 +143,6 @@ export const pdfTools: Tool[] = [
     new: true,
   },
   {
-    id: 'scan-to-pdf',
-    name: 'Scan to PDF',
-    description: 'Turn scanned images into a PDF document',
-    icon: 'ScanText',
-    category: 'pdf',
-    href: '/pdf-tools/scan-to-pdf',
-  },
-  {
     id: 'powerpoint-to-pdf',
     name: 'PowerPoint to PDF',
     description: 'Convert PPT/PPTX slides into PDF',
@@ -197,8 +189,7 @@ export const pdfTools: Tool[] = [
     description: 'Convert PDF files to archival PDF/A format',
     icon: 'FileOutput',
     category: 'pdf',
-    href: '/pdf-tools/pdf-to-pdfa',
-    comingSoon: true,
+    href: '/tools/pdf-to-pdfa',
   },
   {
     id: 'edit-pdf',

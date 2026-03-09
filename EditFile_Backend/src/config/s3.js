@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { createReadStream } from 'fs';
 import path from 'path';
 import {
   S3Client,
@@ -146,6 +147,49 @@ export const uploadFile = async (buffer, key, contentType) => {
     return `s3://${BUCKET_NAME}/${key}`;
   } catch (error) {
     logger.error('Storage upload error:', error);
+    throw new Error('Failed to upload file to storage');
+  }
+};
+
+export const uploadFileFromPath = async (filePath, key, contentType) => {
+  try {
+    if (isLocalStorageMode) {
+      await ensureWorkspaceDirectories();
+      const { cleanKey, absolutePath } = getLocalFilePath(key);
+      await ensureLocalDirectory(absolutePath);
+      await fs.copyFile(filePath, absolutePath);
+      await fs.writeFile(
+        getLocalMetadataPath(absolutePath),
+        JSON.stringify(
+          {
+            contentType,
+            uploadedAt: new Date().toISOString(),
+          },
+          null,
+          2
+        )
+      );
+
+      logger.info(`File uploaded from path to local storage: ${cleanKey}`);
+      return `local://${cleanKey}`;
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: createReadStream(filePath),
+      ContentType: contentType,
+      Metadata: {
+        'uploaded-at': new Date().toISOString(),
+      },
+    });
+
+    await s3Client.send(command);
+    logger.info(`File uploaded from path to S3: ${key}`);
+
+    return `s3://${BUCKET_NAME}/${key}`;
+  } catch (error) {
+    logger.error('Storage upload-from-path error:', error);
     throw new Error('Failed to upload file to storage');
   }
 };
