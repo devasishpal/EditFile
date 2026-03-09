@@ -23,6 +23,9 @@ import UnlockPDF from '@/tools/UnlockPDF';
 import OCRPDF from '@/tools/OCRPDF';
 import RepairPDF from '@/tools/RepairPDF';
 import OrganizePDF from '@/tools/OrganizePDF';
+import SignPDF from '@/tools/SignPDF';
+import RedactPDF from '@/tools/RedactPDF';
+import ComparePDF from '@/tools/ComparePDF';
 import CompressJPEG from '@/tools/CompressJPEG';
 import ResizeImage from '@/tools/ResizeImage';
 import CropImage from '@/tools/CropImage';
@@ -221,12 +224,7 @@ const pdfToolRoutes = [
       'Sign PDF',
       'Add signatures to PDF files',
       'FileText',
-      <ComingSoonTool
-        title="Sign PDF is added"
-        message="The tool page and route are ready. Signature workflow integration is pending."
-        suggestedToolHref="/pdf-tools/add-watermark"
-        suggestedToolLabel="Add Watermark"
-      />
+      <SignPDF />
     ),
   },
   {
@@ -235,12 +233,7 @@ const pdfToolRoutes = [
       'Redact PDF',
       'Hide sensitive information permanently',
       'Trash2',
-      <ComingSoonTool
-        title="Redact PDF is added"
-        message="The tool page and route are ready. Permanent redaction processing is pending."
-        suggestedToolHref="/pdf-tools/delete-pages"
-        suggestedToolLabel="Remove Pages"
-      />
+      <RedactPDF />
     ),
   },
   {
@@ -249,10 +242,7 @@ const pdfToolRoutes = [
       'Compare PDF',
       'Compare documents and inspect differences',
       'LayoutGrid',
-      <ComingSoonTool
-        title="Compare PDF is added"
-        message="The tool page and route are ready. Diff analysis processing is pending."
-      />
+      <ComparePDF />
     ),
   },
   {

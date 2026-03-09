@@ -216,7 +216,6 @@ export const pdfTools: Tool[] = [
     icon: 'FileText',
     category: 'pdf',
     href: '/pdf-tools/sign-pdf',
-    comingSoon: true,
   },
   {
     id: 'redact-pdf',
@@ -225,7 +224,6 @@ export const pdfTools: Tool[] = [
     icon: 'Trash2',
     category: 'pdf',
     href: '/pdf-tools/redact-pdf',
-    comingSoon: true,
   },
   {
     id: 'compare-pdf',
@@ -234,7 +232,6 @@ export const pdfTools: Tool[] = [
     icon: 'LayoutGrid',
     category: 'pdf',
     href: '/pdf-tools/compare-pdf',
-    comingSoon: true,
   },
   {
     id: 'translate-pdf',

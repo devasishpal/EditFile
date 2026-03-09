@@ -6,6 +6,54 @@ export interface ProcessedPdfFile {
   contentType: string;
 }
 
+export interface PdfSignPlacement {
+  renderer: 'image' | 'text';
+  pageIndex: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  opacity?: number;
+  align?: 'left' | 'center' | 'right';
+  text?: string;
+  fontFamily?: 'sans' | 'serif' | 'mono';
+  fontStyle?: 'normal' | 'bold' | 'italic';
+  fontColor?: string;
+  assetDataUrl?: string;
+}
+
+export interface PdfRedactionPlacement {
+  pageIndex: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  style: 'black' | 'white' | 'blur';
+}
+
+export interface ComparePdfPageReportPayload {
+  pageIndex: number;
+  differenceTypes: Array<'text' | 'layout' | 'image'>;
+  addedCount: number;
+  removedCount: number;
+  changedCount: number;
+  visualChangeRatio: number;
+  addedSamples: string[];
+  removedSamples: string[];
+  originalPreviewDataUrl: string;
+  modifiedPreviewDataUrl: string;
+}
+
+export interface ComparePdfSummaryPayload {
+  totalPages: number;
+  pagesWithDifferences: number;
+  textChanges: number;
+  layoutChanges: number;
+  imageChanges: number;
+  pageReports: ComparePdfPageReportPayload[];
+}
+
 const getErrorMessage = async (response: Response) => {
   try {
     const payload = await response.json();
@@ -152,6 +200,53 @@ export const addPdfWatermarkFile = async (
     '/api/add-watermark',
     formData,
     file.name
+  );
+};
+
+export const signPdfFile = async (
+  file: File,
+  placements: PdfSignPlacement[]
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('placements', JSON.stringify(placements));
+
+  return requestProcessedPdf(
+    '/api/sign-pdf',
+    formData,
+    file.name.replace(/\.pdf$/i, '_signed.pdf')
+  );
+};
+
+export const redactPdfFile = async (
+  file: File,
+  redactions: PdfRedactionPlacement[]
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('redactions', JSON.stringify(redactions));
+
+  return requestProcessedPdf(
+    '/api/redact-pdf',
+    formData,
+    file.name.replace(/\.pdf$/i, '_redacted.pdf')
+  );
+};
+
+export const comparePdfReportFile = async (
+  originalFile: File,
+  modifiedFile: File,
+  summary: ComparePdfSummaryPayload
+) => {
+  const formData = new FormData();
+  formData.append('originalFile', originalFile);
+  formData.append('modifiedFile', modifiedFile);
+  formData.append('summary', JSON.stringify(summary));
+
+  return requestProcessedPdf(
+    '/api/compare-pdf',
+    formData,
+    `${originalFile.name.replace(/\.pdf$/i, '')}_vs_${modifiedFile.name.replace(/\.pdf$/i, '')}_comparison.pdf`
   );
 };
 
