@@ -16,7 +16,14 @@ const pdfToolSections: ToolSection[] = [
   },
   {
     title: 'CONVERT FROM PDF',
-    toolIds: ['pdf-to-jpg', 'pdf-to-word', 'pdf-to-powerpoint', 'pdf-to-excel', 'pdf-to-pdfa'],
+    toolIds: [
+      'pdf-to-jpg',
+      'pdf-to-word',
+      'pdf-to-powerpoint',
+      'pdf-to-excel',
+      'pdf-to-html',
+      'pdf-to-pdfa',
+    ],
   },
   {
     title: 'EDIT PDF',

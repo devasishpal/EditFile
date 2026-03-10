@@ -8,12 +8,14 @@ import { processMergePdf } from '../modules/merge-pdf/service.js';
 import { processSplitPdf } from '../modules/split-pdf/service.js';
 import { processPdfToWord } from '../modules/pdf-to-word/service.js';
 import { processWordToPdf } from '../modules/word-to-pdf/service.js';
+import { processHtmlToPdf } from '../modules/html-to-pdf/service.js';
 import { processExcelToPdf } from '../modules/excel-to-pdf/service.js';
 import { processPdfToExcel } from '../modules/pdf-to-excel/service.js';
 import { processPowerpointToPdf } from '../modules/powerpoint-to-pdf/service.js';
 import { processPdfToPowerpoint } from '../modules/pdf-to-powerpoint/service.js';
 import { processPdfToJpg } from '../modules/pdf-to-jpg/service.js';
 import { processPdfToPdfA } from '../modules/pdf-to-pdfa/service.js';
+import { processPdfToHtml } from '../modules/pdf-to-html/service.js';
 import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
@@ -57,12 +59,14 @@ const localProcessors = {
   splitPdf: processSplitPdf,
   pdfToWord: processPdfToWord,
   wordToPdf: processWordToPdf,
+  htmlToPdf: processHtmlToPdf,
   excelToPdf: processExcelToPdf,
   pdfToExcel: processPdfToExcel,
   powerpointToPdf: processPowerpointToPdf,
   pdfToPowerpoint: processPdfToPowerpoint,
   pdfToJpg: processPdfToJpg,
   pdfToPdfA: processPdfToPdfA,
+  pdfToHtml: processPdfToHtml,
   jpgToPdf: processJpgToPdf,
   protectPdf: processProtectPdf,
   unlockPdf: processUnlockPdf,
@@ -133,12 +137,14 @@ export const queues = {
   splitPdf: createQueue('split-pdf'),
   pdfToWord: createQueue('pdf-to-word'),
   wordToPdf: createQueue('word-to-pdf'),
+  htmlToPdf: createQueue('html-to-pdf'),
   excelToPdf: createQueue('excel-to-pdf'),
   pdfToExcel: createQueue('pdf-to-excel'),
   powerpointToPdf: createQueue('powerpoint-to-pdf'),
   pdfToPowerpoint: createQueue('pdf-to-powerpoint'),
   pdfToJpg: createQueue('pdf-to-jpg'),
   pdfToPdfA: createQueue('pdf-to-pdfa'),
+  pdfToHtml: createQueue('pdf-to-html'),
   jpgToPdf: createQueue('jpg-to-pdf'),
   protectPdf: createQueue('protect-pdf'),
   unlockPdf: createQueue('unlock-pdf'),

@@ -165,7 +165,6 @@ export const pdfTools: Tool[] = [
     icon: 'FileType',
     category: 'pdf',
     href: '/pdf-tools/html-to-pdf',
-    comingSoon: true,
   },
   {
     id: 'pdf-to-powerpoint',
@@ -182,6 +181,14 @@ export const pdfTools: Tool[] = [
     icon: 'FileText',
     category: 'pdf',
     href: '/pdf-tools/pdf-to-excel',
+  },
+  {
+    id: 'pdf-to-html',
+    name: 'PDF to HTML',
+    description: 'Convert PDF documents into clean HTML webpages.',
+    icon: 'FileCode',
+    category: 'pdf',
+    href: '/pdf-tools/pdf-to-html',
   },
   {
     id: 'pdf-to-pdfa',
@@ -532,4 +539,3 @@ export const howItWorks = [
     icon: 'Download',
   },
 ];
-

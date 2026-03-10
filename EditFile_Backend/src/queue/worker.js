@@ -10,12 +10,14 @@ import { processMergePdf } from '../modules/merge-pdf/service.js';
 import { processSplitPdf } from '../modules/split-pdf/service.js';
 import { processPdfToWord } from '../modules/pdf-to-word/service.js';
 import { processWordToPdf } from '../modules/word-to-pdf/service.js';
+import { processHtmlToPdf } from '../modules/html-to-pdf/service.js';
 import { processExcelToPdf } from '../modules/excel-to-pdf/service.js';
 import { processPdfToExcel } from '../modules/pdf-to-excel/service.js';
 import { processPowerpointToPdf } from '../modules/powerpoint-to-pdf/service.js';
 import { processPdfToPowerpoint } from '../modules/pdf-to-powerpoint/service.js';
 import { processPdfToJpg } from '../modules/pdf-to-jpg/service.js';
 import { processPdfToPdfA } from '../modules/pdf-to-pdfa/service.js';
+import { processPdfToHtml } from '../modules/pdf-to-html/service.js';
 import { processJpgToPdf } from '../modules/jpg-to-pdf/service.js';
 import { processProtectPdf } from '../modules/protect-pdf/service.js';
 import { processUnlockPdf } from '../modules/unlock-pdf/service.js';
@@ -99,12 +101,14 @@ const workers = {
   splitPdf: createWorker('split-pdf', processSplitPdf),
   pdfToWord: createWorker('pdf-to-word', processPdfToWord),
   wordToPdf: createWorker('word-to-pdf', processWordToPdf),
+  htmlToPdf: createWorker('html-to-pdf', processHtmlToPdf),
   excelToPdf: createWorker('excel-to-pdf', processExcelToPdf),
   pdfToExcel: createWorker('pdf-to-excel', processPdfToExcel),
   powerpointToPdf: createWorker('powerpoint-to-pdf', processPowerpointToPdf),
   pdfToPowerpoint: createWorker('pdf-to-powerpoint', processPdfToPowerpoint),
   pdfToJpg: createWorker('pdf-to-jpg', processPdfToJpg),
   pdfToPdfA: createWorker('pdf-to-pdfa', processPdfToPdfA),
+  pdfToHtml: createWorker('pdf-to-html', processPdfToHtml),
   jpgToPdf: createWorker('jpg-to-pdf', processJpgToPdf),
   protectPdf: createWorker('protect-pdf', processProtectPdf),
   unlockPdf: createWorker('unlock-pdf', processUnlockPdf),

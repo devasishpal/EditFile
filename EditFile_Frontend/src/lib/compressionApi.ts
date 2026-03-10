@@ -284,6 +284,27 @@ export const queuePdfToPdfA = async (
   });
 };
 
+export const queuePdfToHtml = async (
+  file: File,
+  onUploadProgress?: UploadProgressHandler
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (onUploadProgress) {
+    return requestJsonWithUploadProgress<QueuedJobResponse>(
+      '/api/pdf-to-html',
+      formData,
+      onUploadProgress
+    );
+  }
+
+  return requestJson<QueuedJobResponse>('/api/pdf-to-html', {
+    method: 'POST',
+    body: formData,
+  });
+};
+
 export const queueProtectPdf = async (
   file: File,
   options: {

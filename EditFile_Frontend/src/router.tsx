@@ -13,6 +13,7 @@ import PowerPointToPDF from '@/tools/PowerPointToPDF';
 import PDFToPowerPoint from '@/tools/PDFToPowerPoint';
 import PDFToJPG from '@/tools/PDFToJPG';
 import PDFToPDFA from '@/tools/PDFToPDFA';
+import PDFToHtml from '@/tools/PDFToHtml';
 import JPGToPDF from '@/tools/JPGToPDF';
 import AddWatermark from '@/tools/AddWatermark';
 import RotatePDF from '@/tools/RotatePDF';
@@ -34,6 +35,7 @@ import ConvertImage from '@/tools/ConvertImage';
 import ImageToPDF from '@/tools/ImageToPDF';
 import RemoveBackground from '@/tools/RemoveBackground';
 import ImageWatermark from '@/tools/ImageWatermark';
+import HtmlToPdf from '@/tools/HtmlToPdf';
 import PassportSizePhotoMaker from '@/tools/PassportSizePhotoMaker';
 import ComingSoonTool from '@/tools/ComingSoonTool';
 import PdfToolsPage from '@/pages/PdfToolsPage';
@@ -155,12 +157,7 @@ const pdfToolRoutes = [
       'HTML to PDF',
       'Convert HTML files into PDF',
       'FileType',
-      <ComingSoonTool
-        title="HTML to PDF is added"
-        message="The tool page and route are ready. Backend conversion wiring can be enabled next."
-        suggestedToolHref="/pdf-tools/word-to-pdf"
-        suggestedToolLabel="Word to PDF"
-      />
+      <HtmlToPdf />
     ),
   },
   {
@@ -188,6 +185,15 @@ const pdfToolRoutes = [
       'Convert PDF files into archival PDF/A format',
       'FileOutput',
       <PDFToPDFA />
+    ),
+  },
+  {
+    path: '/pdf-tools/pdf-to-html',
+    element: toolPage(
+      'PDF to HTML',
+      'Convert PDF documents into clean HTML webpages.',
+      'FileCode',
+      <PDFToHtml />
     ),
   },
   {
@@ -444,6 +450,7 @@ const pdfToolSlugs = [
   'html-to-pdf',
   'pdf-to-powerpoint',
   'pdf-to-excel',
+  'pdf-to-html',
   'pdf-to-pdfa',
   'edit-pdf',
   'crop-pdf',

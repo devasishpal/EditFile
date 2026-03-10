@@ -3,14 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Menu, X, Minimize2, Combine, Scissors, Crop, RotateCw,
-  FileText, FileType, FileOutput, FileImage, Image, Images, Droplets, Lock, Unlock, ScanText, Trash2,
+  FileText, FileType, FileOutput, FileImage, FileCode, Image, Images, Droplets, Lock, Unlock, ScanText, Trash2,
   Hash,
   LayoutGrid, Maximize2, RefreshCw, Wand2, ChevronDown
 } from 'lucide-react';
 import { availablePdfTools, availableImageTools } from '@/lib/data';
 
 const iconMap: Record<string, React.ElementType> = {
-  Minimize2, Combine, Scissors, Crop, RotateCw, FileText, FileType, FileOutput, FileImage, Image, Images,
+  Minimize2, Combine, Scissors, Crop, RotateCw, FileText, FileType, FileOutput, FileImage, FileCode, Image, Images,
   Droplets, Lock, Unlock, ScanText, Trash2, Hash, LayoutGrid, Maximize2, RefreshCw, Wand2,
 };
 
