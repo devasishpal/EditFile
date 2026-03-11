@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
+import rateLimit from 'express-rate-limit';
 
 import { errorHandler } from './middleware/error.middleware.js';
 import { logger } from './utils/logger.js';
@@ -52,24 +54,112 @@ import jobStatusRoutes from './modules/job-status/route.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Security middleware
+if (process.env.TRUST_PROXY) {
+  app.set('trust proxy', process.env.TRUST_PROXY);
+}
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: false,
 }));
 
+app.use(compression());
+
 // CORS configuration
-const configuredFrontendOrigins = (process.env.FRONTEND_URL || '*')
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'https://*.vercel.app',
+];
+
+const configuredFrontendOrigins = (process.env.FRONTEND_URL || defaultAllowedOrigins.join(','))
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
 const allowAnyOrigin = isLocalMode || configuredFrontendOrigins.includes('*');
+const parseOriginPattern = (pattern) => {
+  const trimmed = String(pattern || '').trim();
+  if (!trimmed || trimmed === '*') {
+    return { any: true };
+  }
+
+  const hasScheme = trimmed.includes('://');
+  const [scheme, rest] = hasScheme ? trimmed.split('://') : [null, trimmed];
+  const hostWithPort = rest.split('/')[0];
+  const [hostPattern, portPattern] = hostWithPort.split(':');
+  return {
+    any: false,
+    scheme: scheme ? scheme.toLowerCase() : null,
+    hostPattern: (hostPattern || '').toLowerCase(),
+    portPattern: portPattern || null,
+  };
+};
+
+const matchHostPattern = (hostname, hostPattern) => {
+  if (!hostPattern || hostPattern === '*') {
+    return true;
+  }
+
+  if (!hostPattern.includes('*')) {
+    return hostname === hostPattern;
+  }
+
+  const normalizedHost = hostname.toLowerCase();
+  const suffix = hostPattern.replace(/^\*\./, '');
+  return normalizedHost === suffix || normalizedHost.endsWith(`.${suffix}`);
+};
+
+const isOriginAllowed = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (allowAnyOrigin) {
+    return true;
+  }
+
+  let parsedOrigin;
+  try {
+    parsedOrigin = new URL(origin);
+  } catch {
+    return false;
+  }
+
+  const originScheme = parsedOrigin.protocol.replace(':', '').toLowerCase();
+  const originHost = parsedOrigin.hostname.toLowerCase();
+  const originPort = parsedOrigin.port || '';
+
+  return configuredFrontendOrigins
+    .map(parseOriginPattern)
+    .some((pattern) => {
+      if (pattern.any) {
+        return true;
+      }
+
+      if (pattern.scheme && pattern.scheme !== originScheme) {
+        return false;
+      }
+
+      if (!matchHostPattern(originHost, pattern.hostPattern)) {
+        return false;
+      }
+
+      if (pattern.portPattern && pattern.portPattern !== originPort) {
+        return false;
+      }
+
+      return true;
+    });
+};
 const corsOrigin = allowAnyOrigin
   ? true
   : (origin, callback) => {
-      if (!origin || configuredFrontendOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
         return;
       }
@@ -82,6 +172,27 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: !allowAnyOrigin,
 }));
+
+const rateLimitWindowMs = Number.parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10);
+const rateLimitMax = Number.parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10);
+const uploadRateLimitMax = Number.parseInt(process.env.UPLOAD_RATE_LIMIT_MAX || '20', 10);
+
+const apiLimiter = rateLimit({
+  windowMs: Number.isFinite(rateLimitWindowMs) ? rateLimitWindowMs : 15 * 60 * 1000,
+  max: Number.isFinite(rateLimitMax) ? rateLimitMax : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const uploadLimiter = rateLimit({
+  windowMs: Number.isFinite(rateLimitWindowMs) ? rateLimitWindowMs : 15 * 60 * 1000,
+  max: Number.isFinite(uploadRateLimitMax) ? uploadRateLimitMax : 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method),
+});
+
+app.use('/api', apiLimiter, uploadLimiter);
 
 // Body parsing
 app.use(express.json());

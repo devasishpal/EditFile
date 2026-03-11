@@ -5,10 +5,16 @@ import { validateCompressionLevel, validateTargetSizeKB } from '../../middleware
 import { validateFileType, ALLOWED_PDF_TYPES } from '../../middleware/validation.middleware.js';
 
 const router = express.Router();
+const MAX_UPLOAD_SIZE_MB = Number.parseInt(process.env.MAX_FILE_SIZE_MB || '100', 10);
+const MAX_UPLOAD_SIZE_BYTES =
+  (Number.isFinite(MAX_UPLOAD_SIZE_MB) ? MAX_UPLOAD_SIZE_MB : 100) * 1024 * 1024;
 
 // Configure multer for memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: MAX_UPLOAD_SIZE_BYTES,
+  },
 });
 
 /**

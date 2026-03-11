@@ -13,7 +13,27 @@ import { logger } from '../utils/logger.js';
 import { isLocalStorageMode } from './runtime.js';
 import { ensureWorkspaceDirectories, STORAGE_DIR } from '../utils/workspace.js';
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const pickEnv = (...keys) => {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (value && String(value).trim()) {
+      return value;
+    }
+  }
+  return undefined;
+};
+
+const BUCKET_NAME = pickEnv('S3_BUCKET_NAME', 'R2_BUCKET_NAME');
+const S3_ENDPOINT = pickEnv('S3_ENDPOINT', 'R2_ENDPOINT');
+const S3_REGION = pickEnv('S3_REGION', 'R2_REGION') || 'auto';
+const S3_ACCESS_KEY_ID = pickEnv('S3_ACCESS_KEY_ID', 'R2_ACCESS_KEY');
+const S3_SECRET_ACCESS_KEY = pickEnv('S3_SECRET_ACCESS_KEY', 'R2_SECRET_KEY');
+const S3_FORCE_PATH_STYLE_RAW = pickEnv('S3_FORCE_PATH_STYLE', 'R2_FORCE_PATH_STYLE');
+const S3_FORCE_PATH_STYLE =
+  String(
+    S3_FORCE_PATH_STYLE_RAW
+      ?? (process.env.R2_ENDPOINT || process.env.R2_BUCKET_NAME ? 'true' : 'false')
+  ).toLowerCase() === 'true';
 const EXPIRES_IN = 3600;
 const LOCAL_STORAGE_ROOT = path.resolve(
   process.env.LOCAL_STORAGE_PATH
@@ -24,13 +44,13 @@ const LOCAL_STORAGE_ROOT = path.resolve(
 const s3Client = isLocalStorageMode
   ? null
   : new S3Client({
-      region: process.env.S3_REGION || 'auto',
-      endpoint: process.env.S3_ENDPOINT,
+      region: S3_REGION,
+      endpoint: S3_ENDPOINT,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        accessKeyId: S3_ACCESS_KEY_ID,
+        secretAccessKey: S3_SECRET_ACCESS_KEY,
       },
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+      forcePathStyle: S3_FORCE_PATH_STYLE,
     });
 
 if (isLocalStorageMode) {
@@ -99,7 +119,7 @@ const ensureLocalDirectory = async (absolutePath) => {
 };
 
 const getPublicBaseUrl = () =>
-  process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`;
+  process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`;
 
 const sanitizeHeaderFileName = (fileName = 'download') => {
   const sanitized = String(fileName || '')

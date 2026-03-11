@@ -27,6 +27,7 @@
     "@aws-sdk/s3-request-presigner": "^3.478.0",
     "axios": "^1.13.6",
     "bullmq": "^5.1.0",
+    "compression": "^1.7.5",
     "cors": "^2.8.5",
     "dompurify": "^3.3.2",
     "dotenv": "^16.3.1",

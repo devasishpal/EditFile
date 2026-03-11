@@ -154,9 +154,9 @@ cp .env.example .env
 
 ```env
 LOCAL_MODE=true
-PORT=3000
+PORT=5000
 FRONTEND_URL=http://localhost:5173
-BACKEND_PUBLIC_URL=http://localhost:3000
+BACKEND_PUBLIC_URL=http://localhost:5000
 ```
 
 ### 3) Start the backend
@@ -256,7 +256,7 @@ Create `.env` from `.env.example` and set production values:
 ```env
 LOCAL_MODE=false
 NODE_ENV=production
-PORT=3000
+PORT=5000
 FRONTEND_URL=https://your-app.vercel.app,https://yourdomain.com
 BACKEND_PUBLIC_URL=https://api.yourdomain.com
 
@@ -344,7 +344,7 @@ Then test one upload flow from the deployed frontend and confirm:
 |----------|-------------|----------|
 | `LOCAL_MODE` | Enables in-memory DB/queue/storage mode | No (`false` for production) |
 | `NODE_ENV` | Environment (development/production) | Yes |
-| `PORT` | Server port | No (default: 3000) |
+| `PORT` | Server port | No (default: 5000) |
 | `FRONTEND_URL` | Frontend URL for CORS | Yes |
 | `BACKEND_PUBLIC_URL` | Public backend URL used for generated local download links | Recommended |
 | `DATABASE_URL` | CockroachDB connection string | Yes when `LOCAL_MODE=false` |

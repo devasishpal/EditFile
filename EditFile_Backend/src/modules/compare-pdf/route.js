@@ -1,6 +1,11 @@
 import express from 'express';
 import multer from 'multer';
 import { comparePdf } from './controller.js';
+import {
+  validateFileType,
+  ALLOWED_PDF_TYPES,
+  ALLOWED_PDF_EXTENSIONS,
+} from '../../middleware/validation.middleware.js';
 
 const router = express.Router();
 
@@ -17,6 +22,7 @@ router.post(
     { name: 'originalFile', maxCount: 1 },
     { name: 'modifiedFile', maxCount: 1 },
   ]),
+  validateFileType(ALLOWED_PDF_TYPES, ALLOWED_PDF_EXTENSIONS),
   comparePdf
 );
 

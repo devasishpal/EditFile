@@ -148,7 +148,7 @@ Each tool has its own module with:
 
 ```
 NODE_ENV=production
-PORT=3000
+PORT=5000
 FRONTEND_URL=https://your-frontend.com
 
 # Database
